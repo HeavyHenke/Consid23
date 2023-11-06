@@ -177,8 +177,7 @@ namespace Considition2023_Cs
 
             double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
-            int distance = (int)Math.Round(r * c, 0);
-
+            int distance = (int) (r * c + .5);
             return distance;
         }
     }

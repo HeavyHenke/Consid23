@@ -36,7 +36,7 @@ const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 //     return;
 // }
 
-var mapName = MapNames.Uppsala;
+var mapName = MapNames.Goteborg;
 
 HttpClient client = new();
 Api api = new(client);
@@ -46,7 +46,7 @@ GeneralData generalData = await api.GetGeneralDataAsync();
 var solution = new HenrikSolver1(generalData, mapData).CalcSolution();
 
 GameData score = new Scoring().CalculateScore(string.Empty, solution, mapData, generalData);
-Console.WriteLine($"GameScore: {score.GameScore.Total}");
+Console.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
 
 Console.WriteLine("Press S to submit");
 

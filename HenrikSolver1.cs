@@ -43,7 +43,7 @@ public class HenrikSolver1
             AddOneForAll(scorer, sol);
             var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
 
-            if (postScore.GameScore.Total <= preScore.GameScore.Total)
+            if (ScoreDiff(postScore, preScore) <= 0)
                 break;
         }
         
@@ -58,7 +58,7 @@ public class HenrikSolver1
             RemoveOne(sol, loc);
             var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
 
-            if (postScore.GameScore.Total < preScore.GameScore.Total)
+            if (ScoreDiff(postScore, preScore) < 0)
                 AddOneAt(sol, loc);
         }
     }
@@ -71,7 +71,7 @@ public class HenrikSolver1
             AddOneAt(sol, loc);
             var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
 
-            if (postScore.GameScore.Total < preScore.GameScore.Total)
+            if (ScoreDiff(postScore, preScore) < 0)
                 RemoveOne(sol, loc);
         }
     }
@@ -87,14 +87,18 @@ public class HenrikSolver1
                 Freestyle9100Count = 0
             });
         }
-        else if (loc.Freestyle3100Count < 1)
+        else if (loc.Freestyle3100Count == 0)
         {
             loc.Freestyle3100Count++;
         }
-        else
+        else if(loc.Freestyle9100Count < 5)
         {
             loc.Freestyle3100Count--;
             loc.Freestyle9100Count++;
+        }
+        else if (loc.Freestyle9100Count < 5)
+        {
+            loc.Freestyle3100Count++;
         }
     }
 
@@ -117,5 +121,10 @@ public class HenrikSolver1
 
         if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })
             sol.Locations.Remove(location);
+    }
+
+    private static double ScoreDiff(GameData score1, GameData score2)
+    {
+        return score1.GameScore!.Total - score2.GameScore!.Total;
     }
 }
