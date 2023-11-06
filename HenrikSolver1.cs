@@ -35,29 +35,45 @@ public class HenrikSolver1
             }
         }
         
-        // Try -1 on all (one at a time)
-        foreach (var loc in _mapData.locations.Keys)
+        // Try -1 and +1 on all (one at a time)
+        while (true)
         {
             var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-            RemoveOne(sol, loc);
+            RemoveOneFromAll(scorer, sol);
+            AddOneForAll(scorer, sol);
             var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
 
-            if(postScore.GameScore.Total < preScore.GameScore.Total)
-                AddOneAt(sol, loc);
-        }
-
-        // Again -1
-        foreach (var loc in _mapData.locations.Keys)
-        {
-            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-            RemoveOne(sol, loc);
-            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-
-            if(postScore.GameScore.Total < preScore.GameScore.Total)
-                AddOneAt(sol, loc);
+            if (postScore.GameScore.Total <= preScore.GameScore.Total)
+                break;
         }
         
         return sol;
+    }
+
+    private void RemoveOneFromAll(Scoring scorer, SubmitSolution sol)
+    {
+        foreach (var loc in _mapData.locations.Keys)
+        {
+            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            RemoveOne(sol, loc);
+            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+
+            if (postScore.GameScore.Total < preScore.GameScore.Total)
+                AddOneAt(sol, loc);
+        }
+    }
+
+    private void AddOneForAll(Scoring scorer, SubmitSolution sol)
+    {
+        foreach (var loc in _mapData.locations.Keys)
+        {
+            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            AddOneAt(sol, loc);
+            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+
+            if (postScore.GameScore.Total < preScore.GameScore.Total)
+                RemoveOne(sol, loc);
+        }
     }
 
 
