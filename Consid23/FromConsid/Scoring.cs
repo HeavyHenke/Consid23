@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Considition2023_Cs
 {
-    internal class Scoring
+    public class Scoring
     {
         public GameData CalculateScore(string mapName, SubmitSolution solution, MapData mapEntity, GeneralData generalData)
         {
