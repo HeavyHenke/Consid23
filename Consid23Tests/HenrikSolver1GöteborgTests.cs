@@ -23,7 +23,7 @@ public class HenrikSolver1GöteborgTests
         var scorer = new Scoring();
         var score = scorer.CalculateScore(mapData.MapName, solution, mapData, generalData);
         
-        Debug.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        Trace.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
         
         Assert.IsTrue(score.GameScore!.Total >= 56_826_754);
     }

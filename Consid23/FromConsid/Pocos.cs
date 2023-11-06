@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace Considition2023_Cs
 {
     public class SubmitSolution
     {
         public required Dictionary<string, PlacedLocations> Locations { get; set; }
+
+        public SubmitSolution Clone()
+        {
+            var json = JsonConvert.SerializeObject(this);
+            return JsonConvert.DeserializeObject<SubmitSolution>(json)!;
+        }
     }
 
     public class PlacedLocations
