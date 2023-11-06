@@ -62,7 +62,11 @@ namespace Considition2023_Cs
             }
 
             if (scored.Locations.Count == 0)
-                throw new Exception(string.Format("No valid locations with refill stations were placed for map: {0}", mapName));
+            {
+                scored.GameScore.Total = int.MinValue;
+                return scored;
+                // throw new Exception(string.Format("No valid locations with refill stations were placed for map: {0}", mapName));
+            }
             scored.Locations = DistributeSales(scored.Locations, locationListNoRefillStation, generalData);
 
             foreach (KeyValuePair<string, StoreLocationScoring> kvp in scored.Locations)
