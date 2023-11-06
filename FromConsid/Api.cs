@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Text.Json;
 
 namespace Considition2023_Cs;
 
@@ -7,14 +6,23 @@ internal class Api
 {
     private readonly HttpClient _httpClient;
 
+    private bool _useCache = true;
+    
     public Api(HttpClient httpClient)
     {
         _httpClient = httpClient;
         httpClient.BaseAddress = new Uri("https://api.considition.com/");
     }
-
+    
     public async Task<MapData> GetMapDataAsync(string mapName, string apiKey)
     {
+        if (_useCache && mapName == MapNames.Goteborg)
+        {
+            var json = File.ReadAllText("FromConsid/Cached_goteborg.json");
+            return JsonConvert.DeserializeObject<MapData>(json)!;
+        }
+             
+        
         HttpRequestMessage request = new();
         request.Method = HttpMethod.Get;
         request.RequestUri = new Uri($"/api/game/getmapdata?mapName={Uri.EscapeDataString(mapName)}", UriKind.Relative);
@@ -22,11 +30,18 @@ internal class Api
         HttpResponseMessage response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         string responseText = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<MapData>(responseText);
+
+        return JsonConvert.DeserializeObject<MapData>(responseText)!;
     }
 
     public async Task<GeneralData> GetGeneralDataAsync()
     {
+        if (_useCache)
+        {
+            var json = File.ReadAllText("FromConsid/Cached_general.json");
+            return JsonConvert.DeserializeObject<GeneralData>(json)!;
+        }
+        
         var response = await _httpClient.GetAsync("/api/game/getgeneralgamedata");
         response.EnsureSuccessStatusCode();
         string responseText = await response.Content.ReadAsStringAsync();

@@ -158,7 +158,7 @@ namespace Considition2023_Cs
             return with;
         }
 
-        private static int DistanceBetweenPoint(double latitude1, double longitude1, double latitude2, double longitude2)
+        public static int DistanceBetweenPoint(double latitude1, double longitude1, double latitude2, double longitude2)
         {
             double r = 6371e3;
             double latRadian1 = latitude1 * Math.PI / 180;
