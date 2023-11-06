@@ -1,4 +1,5 @@
-﻿using Considition2023_Cs;
+﻿using Consid23;
+using Considition2023_Cs;
 
 const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 
@@ -24,6 +25,8 @@ var mapName = option switch
     "5" => MapNames.Vasteras,
     "6" => MapNames.Orebro,
     "7" => MapNames.London,
+    "8" => MapNames.Linkoping,
+    "9" => MapNames.Berlin,
     _ => null
 };
 
@@ -37,27 +40,17 @@ HttpClient client = new();
 Api api = new(client);
 MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
-SubmitSolution solution = new() 
-{
-    Locations = new()
-};
-foreach (KeyValuePair<string, StoreLocation> locationKeyPair in mapData.locations)
-{
-    StoreLocation location = locationKeyPair.Value;
-    //string name = locationKeyPair.Key;
-    var salesVolume = location.SalesVolume;
-    if (salesVolume > 100)
-    {
-        solution.Locations[location.LocationName] = new PlacedLocations() 
-        { 
-            Freestyle3100Count = 0, 
-            Freestyle9100Count = 1
-        };
-    }
-}
+
+var solution = new HenrikSolver1(generalData, mapData).CalcSolution();
 
 GameData score = new Scoring().CalculateScore(string.Empty, solution, mapData, generalData);
 Console.WriteLine($"GameScore: {score.GameScore.Total}");
-GameData prodScore = await api.SumbitAsync(mapName, solution, apikey);
-Console.WriteLine($"GameId: {prodScore.Id}");
-Console.ReadLine();
+
+Console.WriteLine("Press S to submit");
+var inp = Console.ReadKey();
+if (inp.Key == ConsoleKey.S)
+{
+    GameData prodScore = await api.SumbitAsync(mapName, solution, apikey);
+    Console.WriteLine($"GameId: {prodScore.Id}");
+    Console.ReadLine();
+}
