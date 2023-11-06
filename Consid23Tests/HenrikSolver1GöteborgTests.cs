@@ -1,3 +1,4 @@
+﻿using System.Diagnostics;
 using Consid23;
 using Considition2023_Cs;
 using Newtonsoft.Json;
@@ -5,12 +6,12 @@ using Newtonsoft.Json;
 namespace Consid23Tests;
 
 [TestClass]
-public class HenrikSolver1LinköpingTests
+public class HenrikSolver1GöteborgTests
 {
     [TestMethod]
-    public void SolveSmallWorldGivesGoodSolution()
+    public void SolveGöteborgGivesGoodSolution()
     {
-        var mapDataJson = File.ReadAllText("linkoping.cached.json");
+        var mapDataJson = File.ReadAllText("goteborg.cached.json");
         var mapData = JsonConvert.DeserializeObject<MapData>(mapDataJson)!;
 
         var generalDataJson = File.ReadAllText("Cached_general.json");
@@ -22,6 +23,8 @@ public class HenrikSolver1LinköpingTests
         var scorer = new Scoring();
         var score = scorer.CalculateScore(mapData.MapName, solution, mapData, generalData);
         
-        Assert.IsTrue(score.GameScore!.Total >= 340_565);
+        Debug.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        
+        Assert.IsTrue(score.GameScore!.Total >= 56_826_754);
     }
 }
