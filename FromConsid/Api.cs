@@ -16,12 +16,11 @@ internal class Api
     
     public async Task<MapData> GetMapDataAsync(string mapName, string apiKey)
     {
-        if (_useCache && mapName == MapNames.Goteborg)
+        if (_useCache && File.Exists(mapName+".cached.json"))
         {
-            var json = File.ReadAllText("FromConsid/Cached_goteborg.json");
+            var json = await File.ReadAllTextAsync(mapName+".cached.json");
             return JsonConvert.DeserializeObject<MapData>(json)!;
         }
-             
         
         HttpRequestMessage request = new();
         request.Method = HttpMethod.Get;
@@ -31,21 +30,28 @@ internal class Api
         response.EnsureSuccessStatusCode();
         string responseText = await response.Content.ReadAsStringAsync();
 
+        if (_useCache) 
+            await File.WriteAllTextAsync(mapName + ".cached.json", responseText);
+
         return JsonConvert.DeserializeObject<MapData>(responseText)!;
     }
 
     public async Task<GeneralData> GetGeneralDataAsync()
     {
-        if (_useCache)
+        if (_useCache && File.Exists("Cached_general.json"))
         {
-            var json = File.ReadAllText("FromConsid/Cached_general.json");
+            var json = await File.ReadAllTextAsync("Cached_general.json");
             return JsonConvert.DeserializeObject<GeneralData>(json)!;
         }
         
         var response = await _httpClient.GetAsync("/api/game/getgeneralgamedata");
         response.EnsureSuccessStatusCode();
         string responseText = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<GeneralData>(responseText);
+        
+        if(_useCache)
+            await File.WriteAllTextAsync("Cached_general.json", responseText);
+        
+        return JsonConvert.DeserializeObject<GeneralData>(responseText)!;
     }
 
     public async Task<GameData> GetGameAsync(Guid id)
@@ -53,7 +59,7 @@ internal class Api
         var response = await _httpClient.GetAsync($"/api/game/getgamedata{id}");
         response.EnsureSuccessStatusCode();
         string responseText = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<GameData>(responseText);
+        return JsonConvert.DeserializeObject<GameData>(responseText)!;
     }
 
     public async Task<GameData> SumbitAsync(string mapName, SubmitSolution solution, string apiKey)
@@ -65,6 +71,6 @@ internal class Api
         request.Content = new StringContent(JsonConvert.SerializeObject(solution), System.Text.Encoding.UTF8, "application/json");
         HttpResponseMessage response = _httpClient.Send(request);
         string responseText = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<GameData>(responseText);
+        return JsonConvert.DeserializeObject<GameData>(responseText)!;
     }
 }   
