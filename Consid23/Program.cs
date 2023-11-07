@@ -36,12 +36,15 @@ const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 //     return;
 // }
 
-var mapName = MapNames.Vasteras;
+var mapName = MapNames.Goteborg;
 
 HttpClient client = new();
 Api api = new(client);
 MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
+
+// mapData.RandomizeLocationOrder();
+
 
 var solution = new HenrikSolver1(generalData, mapData).CalcSolution();
 
