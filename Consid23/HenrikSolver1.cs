@@ -16,25 +16,9 @@ public class HenrikSolver1
     public SubmitSolution CalcSolution()
     {
         var scorer = new Scoring();
+
+        var sol = CreateStartPointByAddOneAt(scorer);
         
-        SubmitSolution sol = new SubmitSolution
-        {
-            Locations = new()
-        };
-
-        foreach (var loc in _mapData.locations)
-        {
-            while (true)
-            {
-                AddOneAt(sol, loc.Key);
-
-                var score = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-
-                if (score.Locations[loc.Key].SalesCapacity > score.Locations[loc.Key].SalesVolume)
-                    break;
-            }
-        }
-
         // Does not help :(
         //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
         
@@ -64,6 +48,59 @@ public class HenrikSolver1
         return sol;
     }
 
+    private SubmitSolution CreateStartPointBySalesVolume()
+    {
+        SubmitSolution sol = new SubmitSolution
+        {
+            Locations = new()
+        };
+        
+        int smallOnesPerBig = (int)(_generalData.Freestyle9100Data.RefillCapacityPerWeek / _generalData.Freestyle3100Data.RefillCapacityPerWeek); 
+        foreach (var loc in _mapData.locations)
+        {
+            var bigOnes = (int) (loc.Value.SalesVolume / _generalData.Freestyle9100Data.RefillCapacityPerWeek);
+            var smallOnes = (int)((loc.Value.SalesVolume - bigOnes * _generalData.Freestyle9100Data.RefillCapacityPerWeek) / _generalData.Freestyle3100Data.RefillCapacityPerWeek);
+
+            while (smallOnes > 2)
+            {
+                smallOnes -= smallOnesPerBig;
+                bigOnes++;
+            }
+            
+            bigOnes = Math.Max(0, bigOnes);
+            smallOnes = Math.Max(0, smallOnes);
+            if (smallOnes > 0 || bigOnes > 0)
+            {
+                sol.Locations.Add(loc.Key, new PlacedLocations { Freestyle3100Count = smallOnes, Freestyle9100Count = bigOnes });
+            }
+        }
+
+        return sol;
+    }
+
+    private SubmitSolution CreateStartPointByAddOneAt(Scoring scorer)
+    {
+        var sol = new SubmitSolution
+        {
+            Locations = new()
+        };
+
+        foreach (var loc in _mapData.locations)
+        {
+            while (true)
+            {
+                AddOneAt(sol, loc.Key);
+
+                var score = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+
+                if (score.Locations[loc.Key].SalesCapacity > score.Locations[loc.Key].SalesVolume)
+                    break;
+            }
+        }
+
+        return sol;
+    }
+    
     private void TryMinusOneAndPlusTwoOnNeighbours(Scoring scorer, SubmitSolution sol)
     {
         var bestSore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
