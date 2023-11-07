@@ -36,7 +36,7 @@ public class HenrikSolver1
         }
 
         // Does not help :(
-        TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
+        //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
         
         // Try -1 and +1 on all (one at a time)
         while (true)
@@ -51,15 +51,15 @@ public class HenrikSolver1
         }
 
         // Does not help :(
-        while (true)
-        {
-            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-            TryPlusOneAndMinusTwoOnNeighbours(scorer, ref sol);
-            TryMinusOneAndPlusTwoOnNeighbours(scorer, sol);
-            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-            if (ScoreDiff(postScore, preScore) <= 0)
-                break;
-        }
+        // while (true)
+        // {
+        //     var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+        //     TryPlusOneAndMinusTwoOnNeighbours(scorer, ref sol);
+        //     TryMinusOneAndPlusTwoOnNeighbours(scorer, sol);
+        //     var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+        //     if (ScoreDiff(postScore, preScore) <= 0)
+        //         break;
+        // }
         
         return sol;
     }
