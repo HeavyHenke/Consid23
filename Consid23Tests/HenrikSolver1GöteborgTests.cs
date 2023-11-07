@@ -34,6 +34,10 @@ public class HenrikSolver1GöteborgTests
         var mapDataJson = File.ReadAllText("goteborg.cached.json");
         var mapData = JsonConvert.DeserializeObject<MapData>(mapDataJson)!;
 
+        // Make it bigger
+        mapData.Border.LatitudeMax += (mapData.Border.LatitudeMax - mapData.Border.LatitudeMin); 
+        mapData.Border.LongitudeMax += (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin); 
+        
         var rnd = new Random();
         for (int i = 0; i < 300; i++)
         {
