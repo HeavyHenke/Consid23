@@ -42,24 +42,27 @@ HttpClient client = new();
 Api api = new(client);
 MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
+var submitter = new SolutionSubmitter(api, apikey, generalData, mapData);
 
 // await new HenrikSolverOnePoint(generalData, mapData).Submit100Games(api, apikey);
 
 // mapData.RandomizeLocationOrder();
 
 
-var solution = new HenrikSolver1(generalData, mapData).CalcSolution();
+var solution = new HenrikSolver1(generalData, mapData, submitter).CalcSolution();
+submitter.AddSolutionToSubmit(solution);
+submitter.Dispose();
 
-GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
-Console.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+// GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
+// Console.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
 
-Console.WriteLine("Press S to submit");
-
-var inp = Console.ReadKey();
-if (inp.Key == ConsoleKey.S)
-{
-    GameData prodScore = await api.SumbitAsync(mapName, solution, apikey);
-    Console.WriteLine($"GameId: {prodScore.Id}");
-    Console.WriteLine($"Server score: {prodScore.GameScore.Total}");
-    Console.ReadLine();
-}
+// Console.WriteLine("Press S to submit");
+//
+// var inp = Console.ReadKey();
+// if (inp.Key == ConsoleKey.S)
+// {
+//     GameData prodScore = await api.SumbitAsync(mapName, solution, apikey);
+//     Console.WriteLine($"GameId: {prodScore.Id}");
+//     Console.WriteLine($"Server score: {prodScore.GameScore.Total}");
+//     Console.ReadLine();
+// }

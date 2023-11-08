@@ -7,17 +7,20 @@ public class HenrikSolver1
     private readonly GeneralData _generalData;
     private readonly MapData _mapData;
     private readonly IScoring _scorer;
+    private readonly ISolutionSubmitter _solutionSubmitter;
 
-    public HenrikSolver1(GeneralData generalData, MapData mapData)
+    public HenrikSolver1(GeneralData generalData, MapData mapData, ISolutionSubmitter solutionSubmitter)
     {
         _mapData = mapData;
         _generalData = generalData;
         _scorer = new ScoringHenrik(_generalData, _mapData);
+        _solutionSubmitter = solutionSubmitter;
     }
 
     public SubmitSolution CalcSolution()
     {
         var sol = CreateStartPointByAddOneAt();
+        _solutionSubmitter.AddSolutionToSubmit(sol);
         
         // Does not help :(
         //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
@@ -27,7 +30,9 @@ public class HenrikSolver1
         {
             var preScore = _scorer.CalculateScore(sol);
             RemoveOneFromAll(sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol);
             AddOneForAll(sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol);
             var postScore = _scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) <= 0)

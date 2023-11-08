@@ -17,7 +17,7 @@ public class HenrikSolver1LinköpingTests
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
-        var solver = new HenrikSolver1(generalData, mapData);
+        var solver = new HenrikSolver1(generalData, mapData, new DummySubmitter());
         var solution = solver.CalcSolution();
 
         var scorer = new Scoring(generalData, mapData);
