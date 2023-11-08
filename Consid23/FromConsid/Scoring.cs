@@ -1,6 +1,31 @@
 ﻿namespace Considition2023_Cs
 {
-    public class Scoring
+    public interface IScoring
+    {
+        GameData CalculateScore(SubmitSolution solution);
+    }
+
+    public class CompareScoring : IScoring
+    {
+        private readonly IScoring _scoring1; 
+        private readonly IScoring _scoring2; 
+        public CompareScoring(GeneralData generalData, MapData mapEntity)
+        {
+            _scoring1 = new Scoring(generalData, mapEntity);
+            _scoring2 = new ScoringHenrik(generalData, mapEntity);
+        }
+
+        public GameData CalculateScore(SubmitSolution solution)
+        {
+            var score1 = _scoring1.CalculateScore(solution);
+            var score2 = _scoring2.CalculateScore(solution);
+            if (score1.GameScore.Total != score2.GameScore.Total)
+                throw new Exception("Olika poäng!");
+            return score1;
+        }
+    }
+
+    public class Scoring : IScoring
     {
         private readonly GeneralData _generalData;
         private readonly MapData _mapEntity;

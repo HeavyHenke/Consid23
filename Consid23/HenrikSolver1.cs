@@ -6,18 +6,18 @@ public class HenrikSolver1
 {
     private readonly GeneralData _generalData;
     private readonly MapData _mapData;
+    private readonly IScoring _scorer;
 
     public HenrikSolver1(GeneralData generalData, MapData mapData)
     {
         _mapData = mapData;
         _generalData = generalData;
+        _scorer = new ScoringHenrik(_generalData, _mapData);
     }
 
     public SubmitSolution CalcSolution()
     {
-        var scorer = new Scoring(_generalData, _mapData);
-
-        var sol = CreateStartPointByAddOneAt(scorer);
+        var sol = CreateStartPointByAddOneAt();
         
         // Does not help :(
         //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
@@ -25,10 +25,10 @@ public class HenrikSolver1
         // Try -1 and +1 on all (one at a time)
         while (true)
         {
-            var preScore = scorer.CalculateScore(sol);
-            RemoveOneFromAll(scorer, sol);
-            AddOneForAll(scorer, sol);
-            var postScore = scorer.CalculateScore(sol);
+            var preScore = _scorer.CalculateScore(sol);
+            RemoveOneFromAll(sol);
+            AddOneForAll(sol);
+            var postScore = _scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) <= 0)
                 break;
@@ -78,7 +78,7 @@ public class HenrikSolver1
         return sol;
     }
 
-    private SubmitSolution CreateStartPointByAddOneAt(Scoring scorer)
+    private SubmitSolution CreateStartPointByAddOneAt()
     {
         var sol = new SubmitSolution
         {
@@ -91,7 +91,7 @@ public class HenrikSolver1
             {
                 AddOneAt(sol, loc.Key);
 
-                var score = scorer.CalculateScore(sol);
+                var score = _scorer.CalculateScore(sol);
 
                 if (score.Locations[loc.Key].SalesCapacity > score.Locations[loc.Key].SalesVolume)
                     break;
@@ -227,26 +227,26 @@ public class HenrikSolver1
         return (sol, postScore, scoreDiff);
     }
 
-    private void RemoveOneFromAll(Scoring scorer, SubmitSolution sol)
+    private void RemoveOneFromAll(SubmitSolution sol)
     {
         foreach (var loc in _mapData.locations.Keys)
         {
-            var preScore = scorer.CalculateScore(sol);
+            var preScore = _scorer.CalculateScore(sol);
             RemoveOne(sol, loc);
-            var postScore = scorer.CalculateScore(sol);
+            var postScore = _scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) < 0)
                 AddOneAt(sol, loc);
         }
     }
 
-    private void AddOneForAll(Scoring scorer, SubmitSolution sol)
+    private void AddOneForAll(SubmitSolution sol)
     {
         foreach (var loc in _mapData.locations.Keys)
         {
-            var preScore = scorer.CalculateScore(sol);
+            var preScore = _scorer.CalculateScore(sol);
             AddOneAt(sol, loc);
-            var postScore = scorer.CalculateScore(sol);
+            var postScore = _scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) < 0)
                 RemoveOne(sol, loc);
