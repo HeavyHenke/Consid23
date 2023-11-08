@@ -37,25 +37,26 @@ public class ScoringHenrik : IScoring
             MapName = _mapEntity.MapName,
             TeamId = Guid.Empty,
             TeamName = string.Empty,
-            Locations = new(),
+            Locations = new(_mapEntity.locations.Count),
             GameScore = new()
         };
-        Dictionary<string, StoreLocationScoring> locationListNoRefillStation = new();
-        foreach (KeyValuePair<string, StoreLocation> kvp in _mapEntity.locations)
+        
+        List<(string, StoreLocationScoring)> locationListNoRefillStation = new();
+        foreach (var (key, value) in _mapEntity.locations)
         {
-            if (solution.Locations.TryGetValue(kvp.Key, out var loc))
+            if (solution.Locations.TryGetValue(key, out var loc))
             {
-                var storeLocationScoring = new StoreLocationScoring()
+                var storeLocationScoring = new StoreLocationScoring
                 {
-                    LocationName = kvp.Value.LocationName,
-                    LocationType = kvp.Value.LocationType,
-                    Latitude = kvp.Value.Latitude,
-                    Longitude = kvp.Value.Longitude,
-                    Footfall = kvp.Value.Footfall,
+                    LocationName = value.LocationName,
+                    LocationType = value.LocationType,
+                    Latitude = value.Latitude,
+                    Longitude = value.Longitude,
+                    Footfall = value.Footfall,
                     Freestyle3100Count = loc.Freestyle3100Count,
                     Freestyle9100Count = loc.Freestyle9100Count,
 
-                    SalesVolume = kvp.Value.SalesVolume * _generalData.RefillSalesFactor,
+                    SalesVolume = value.SalesVolume * _generalData.RefillSalesFactor,
 
                     SalesCapacity = loc.Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek +
                                     loc.Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek,
@@ -63,22 +64,22 @@ public class ScoringHenrik : IScoring
                     LeasingCost = loc.Freestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek +
                                   loc.Freestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek
                 };
-                scored.Locations[kvp.Key] = storeLocationScoring;
+                scored.Locations[key] = storeLocationScoring;
 
                 if (storeLocationScoring.SalesCapacity > 0 == false)
                 {
-                    throw new Exception($"You are not allowed to submit locations with no refill stations. Remove or alter location : {kvp.Value.LocationName}");
+                    throw new Exception($"You are not allowed to submit locations with no refill stations. Remove or alter location : {value.LocationName}");
                 }
             }
             else
-                locationListNoRefillStation[kvp.Key] = new()
+                locationListNoRefillStation.Add((key, new()
                 {
-                    LocationName = kvp.Value.LocationName,
-                    LocationType = kvp.Value.LocationType,
-                    Latitude = kvp.Value.Latitude,
-                    Longitude = kvp.Value.Longitude,
-                    SalesVolume = kvp.Value.SalesVolume * _generalData.RefillSalesFactor,
-                };
+                    LocationName = value.LocationName,
+                    LocationType = value.LocationType,
+                    Latitude = value.Latitude,
+                    Longitude = value.Longitude,
+                    SalesVolume = value.SalesVolume * _generalData.RefillSalesFactor,
+                }));
         }
 
         if (scored.Locations.Count == 0)
@@ -88,39 +89,39 @@ public class ScoringHenrik : IScoring
         }
         scored.Locations = DistributeSales(scored.Locations, locationListNoRefillStation);
 
-        foreach (KeyValuePair<string, StoreLocationScoring> kvp in scored.Locations)
+        foreach (var location in scored.Locations.Values)
         {
-            kvp.Value.SalesVolume = Math.Round(kvp.Value.SalesVolume, 0);
+            location.SalesVolume = Math.Round(location.SalesVolume, 0);
 
-            double sales = kvp.Value.SalesVolume;
-            if (kvp.Value.SalesCapacity < kvp.Value.SalesVolume) { sales = kvp.Value.SalesCapacity; }
+            double sales = location.SalesVolume;
+            if (location.SalesCapacity < location.SalesVolume) { sales = location.SalesCapacity; }
 
-            kvp.Value.GramCo2Savings = sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams);
-            scored.GameScore.KgCo2Savings += kvp.Value.GramCo2Savings / 1000;
-            if (kvp.Value.GramCo2Savings > 0)
+            location.GramCo2Savings = sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams);
+            scored.GameScore.KgCo2Savings += location.GramCo2Savings / 1000;
+            if (location.GramCo2Savings > 0)
             {
-                kvp.Value.IsCo2Saving = true;
+                location.IsCo2Saving = true;
             }
 
-            kvp.Value.Revenue = sales * _generalData.RefillUnitData.ProfitPerUnit;
-            scored.TotalRevenue += kvp.Value.Revenue;
+            location.Revenue = sales * _generalData.RefillUnitData.ProfitPerUnit;
+            scored.TotalRevenue += location.Revenue;
 
-            kvp.Value.Earnings = kvp.Value.Revenue - kvp.Value.LeasingCost;
-            if (kvp.Value.Earnings > 0)
+            location.Earnings = location.Revenue - location.LeasingCost;
+            if (location.Earnings > 0)
             {
-                kvp.Value.IsProfitable = true;
+                location.IsProfitable = true;
             }
 
-            scored.TotalLeasingCost += kvp.Value.LeasingCost;
+            scored.TotalLeasingCost += location.LeasingCost;
 
-            scored.TotalFreestyle3100Count += kvp.Value.Freestyle3100Count;
-            scored.TotalFreestyle9100Count += kvp.Value.Freestyle9100Count;
+            scored.TotalFreestyle3100Count += location.Freestyle3100Count;
+            scored.TotalFreestyle9100Count += location.Freestyle9100Count;
 
-            scored.GameScore.TotalFootfall += kvp.Value.Footfall;
+            scored.GameScore.TotalFootfall += location.Footfall;
         }
 
         //Just some rounding for nice whole numbers
-        scored.TotalRevenue = Math.Round(scored.TotalRevenue, 0);
+        scored.TotalRevenue = (long)(scored.TotalRevenue + .5);
         scored.GameScore.KgCo2Savings = Math.Round(
             scored.GameScore.KgCo2Savings
             - scored.TotalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000
@@ -140,13 +141,13 @@ public class ScoringHenrik : IScoring
         return scored;
     }
 
-    private Dictionary<string, StoreLocationScoring> DistributeSales(Dictionary<string, StoreLocationScoring> with, Dictionary<string, StoreLocationScoring> without)
+    private Dictionary<string, StoreLocationScoring> DistributeSales(Dictionary<string, StoreLocationScoring> with, IEnumerable<(string location, StoreLocationScoring value)> without)
     {
-        foreach (KeyValuePair<string, StoreLocationScoring> kvpWithout in without)
+        foreach (var (key, value) in without)
         {
             Dictionary<string, double> distributeSalesTo = new();
 
-            foreach (var neighbour in _neighbours[kvpWithout.Key])
+            foreach (var neighbour in _neighbours[key])
             {
                 if(with.ContainsKey(neighbour.neighbour))
                     distributeSalesTo[neighbour.neighbour] = neighbour.distance;
@@ -165,7 +166,7 @@ public class ScoringHenrik : IScoring
                 foreach (KeyValuePair<string, double> kvp in distributeSalesTo)
                 {
                     with[kvp.Key].SalesVolume += distributeSalesTo[kvp.Key] / total *
-                                                 _generalData.RefillDistributionRate * kvpWithout.Value.SalesVolume;//locationSalesFrom;
+                                                 _generalData.RefillDistributionRate * value.SalesVolume;//locationSalesFrom;
                 }
             }
         }
