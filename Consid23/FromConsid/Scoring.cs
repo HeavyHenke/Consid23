@@ -1,25 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Considition2023_Cs
+﻿namespace Considition2023_Cs
 {
     public class Scoring
     {
-        public GameData CalculateScore(string mapName, SubmitSolution solution, MapData mapEntity, GeneralData generalData)
+        private readonly GeneralData _generalData;
+        private readonly MapData _mapEntity;
+
+        public Scoring(GeneralData generalData, MapData mapEntity)
+        {
+            _generalData = generalData;
+            _mapEntity = mapEntity;
+        }
+        
+        public GameData CalculateScore(SubmitSolution solution)
         {
             GameData scored = new() 
             {
-                MapName = mapName,
+                MapName = _mapEntity.MapName,
                 TeamId = Guid.Empty,
                 TeamName = string.Empty,
                 Locations = new(),
                 GameScore = new()
             };
             Dictionary<string, StoreLocationScoring> locationListNoRefillStation = new();
-            foreach (KeyValuePair<string, StoreLocation> kvp in mapEntity.locations)
+            foreach (KeyValuePair<string, StoreLocation> kvp in _mapEntity.locations)
             {
                 if (solution.Locations.ContainsKey(kvp.Key) == true)
                 {
@@ -33,15 +36,15 @@ namespace Considition2023_Cs
                         Freestyle3100Count = solution.Locations[kvp.Key].Freestyle3100Count,
                         Freestyle9100Count = solution.Locations[kvp.Key].Freestyle9100Count,
 
-                        SalesVolume = kvp.Value.SalesVolume * generalData.RefillSalesFactor,
+                        SalesVolume = kvp.Value.SalesVolume * _generalData.RefillSalesFactor,
                         // await GetSalesVolume(kvp.Value.LocationType) ??
                         //     throw new Exception(string.Format("Location: {0}, have an invalid location type: {1}", kvp.Key, kvp.Value.LocationType)),
 
-                        SalesCapacity = solution.Locations[kvp.Key].Freestyle3100Count * generalData.Freestyle3100Data.RefillCapacityPerWeek +
-                            solution.Locations[kvp.Key].Freestyle9100Count * generalData.Freestyle9100Data.RefillCapacityPerWeek,
+                        SalesCapacity = solution.Locations[kvp.Key].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek +
+                            solution.Locations[kvp.Key].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek,
 
-                        LeasingCost = solution.Locations[kvp.Key].Freestyle3100Count * generalData.Freestyle3100Data.LeasingCostPerWeek +
-                            solution.Locations[kvp.Key].Freestyle9100Count * generalData.Freestyle9100Data.LeasingCostPerWeek
+                        LeasingCost = solution.Locations[kvp.Key].Freestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek +
+                            solution.Locations[kvp.Key].Freestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek
                     };
 
                     if (scored.Locations[kvp.Key].SalesCapacity > 0 == false)
@@ -56,7 +59,7 @@ namespace Considition2023_Cs
                         LocationType = kvp.Value.LocationType,
                         Latitude = kvp.Value.Latitude,
                         Longitude = kvp.Value.Longitude,
-                        SalesVolume = kvp.Value.SalesVolume * generalData.RefillSalesFactor,
+                        SalesVolume = kvp.Value.SalesVolume * _generalData.RefillSalesFactor,
                         //await GetSalesVolume(kvp.Value.LocationType) ?? throw new Exception(string.Format("Location: {0}, have an invalid location type: {1}", kvp.Key, kvp.Value.LocationType)),
                     };
             }
@@ -67,7 +70,7 @@ namespace Considition2023_Cs
                 return scored;
                 // throw new Exception(string.Format("No valid locations with refill stations were placed for map: {0}", mapName));
             }
-            scored.Locations = DistributeSales(scored.Locations, locationListNoRefillStation, generalData);
+            scored.Locations = DistributeSales(scored.Locations, locationListNoRefillStation, _generalData);
 
             foreach (KeyValuePair<string, StoreLocationScoring> kvp in scored.Locations)
             {
@@ -76,14 +79,14 @@ namespace Considition2023_Cs
                 double sales = kvp.Value.SalesVolume;
                 if (kvp.Value.SalesCapacity < kvp.Value.SalesVolume) { sales = kvp.Value.SalesCapacity; }
 
-                kvp.Value.GramCo2Savings = sales * (generalData.ClassicUnitData.Co2PerUnitInGrams - generalData.RefillUnitData.Co2PerUnitInGrams);
+                kvp.Value.GramCo2Savings = sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams);
                 scored.GameScore.KgCo2Savings += kvp.Value.GramCo2Savings / 1000;
                 if (kvp.Value.GramCo2Savings > 0)
                 {
                     kvp.Value.IsCo2Saving = true;
                 }
 
-                kvp.Value.Revenue = sales * generalData.RefillUnitData.ProfitPerUnit;
+                kvp.Value.Revenue = sales * _generalData.RefillUnitData.ProfitPerUnit;
                 scored.TotalRevenue += kvp.Value.Revenue;
 
                 kvp.Value.Earnings = kvp.Value.Revenue - kvp.Value.LeasingCost;
@@ -106,8 +109,8 @@ namespace Considition2023_Cs
             scored.TotalRevenue = Math.Round(scored.TotalRevenue, 0);
             scored.GameScore.KgCo2Savings = Math.Round(
                 scored.GameScore.KgCo2Savings
-                - scored.TotalFreestyle3100Count * generalData.Freestyle3100Data.StaticCo2 / 1000
-                - scored.TotalFreestyle9100Count * generalData.Freestyle9100Data.StaticCo2 / 1000
+                - scored.TotalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000
+                - scored.TotalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000
                 , 0);
 
             //Calculate Earnings
@@ -115,7 +118,7 @@ namespace Considition2023_Cs
 
             //Calculate total score
             scored.GameScore.Total = Math.Round(
-                (scored.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek + scored.GameScore.Earnings) *
+                (scored.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek + scored.GameScore.Earnings) *
                 (1 + scored.GameScore.TotalFootfall),
                 0
             );
@@ -123,7 +126,7 @@ namespace Considition2023_Cs
             return scored;
         }
 
-        private Dictionary<string, StoreLocationScoring> DistributeSales(Dictionary<string, StoreLocationScoring> with, Dictionary<string, StoreLocationScoring> without, GeneralData generalData)
+        private static Dictionary<string, StoreLocationScoring> DistributeSales(Dictionary<string, StoreLocationScoring> with, Dictionary<string, StoreLocationScoring> without, GeneralData generalData)
         {
             foreach (KeyValuePair<string, StoreLocationScoring> kvpWithout in without)
             {

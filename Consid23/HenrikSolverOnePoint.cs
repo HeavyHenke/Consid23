@@ -15,7 +15,7 @@ public class HenrikSolverOnePoint
 
     public SubmitSolution CalcSolution()
     {
-        var scorer = new Scoring();
+        var scorer = new Scoring(_generalData, _mapData);
 
         SubmitSolution? bestSol = null;
         GameData bestScore = new GameData
@@ -38,9 +38,9 @@ public class HenrikSolverOnePoint
             {
                 while (true)
                 {
-                    var score = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+                    var score = scorer.CalculateScore(sol);
                     AddOneAt(sol, loc.Key);
-                    var score2 = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+                    var score2 = scorer.CalculateScore(sol);
 
                     if (IsBetterScore(score2, score))
                     {
@@ -57,13 +57,13 @@ public class HenrikSolverOnePoint
                 changed = false;
                 foreach (var source in sol.Locations.Keys.ToList())
                 {
-                    var score = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+                    var score = scorer.CalculateScore(sol);
                     RemoveOne(sol, source);
                     bool movedLast = false;
                     foreach (var dest in _mapData.locations.Keys.Where(k => k != source))
                     {
                         AddOneAt(sol, dest);
-                        var score2 = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+                        var score2 = scorer.CalculateScore(sol);
                         if (IsBetterScore(score, score2))
                         {
                             changed = true;
@@ -87,7 +87,7 @@ public class HenrikSolverOnePoint
                 }
             }
             
-            var finalScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var finalScore = scorer.CalculateScore(sol);
             if (IsBetterScore(bestScore, finalScore))
             {
                 bestScore = finalScore;

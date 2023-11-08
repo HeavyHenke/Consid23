@@ -48,7 +48,7 @@ GeneralData generalData = await api.GetGeneralDataAsync();
 
 var solution = new HenrikSolver1(generalData, mapData).CalcSolution();
 
-GameData score = new Scoring().CalculateScore(string.Empty, solution, mapData, generalData);
+GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
 Console.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
 
 Console.WriteLine("Press S to submit");

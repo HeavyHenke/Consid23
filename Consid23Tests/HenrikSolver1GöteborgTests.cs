@@ -20,10 +20,10 @@ public class HenrikSolver1GöteborgTests
         var solver = new HenrikSolver1(generalData, mapData);
         var solution = solver.CalcSolution();
 
-        var scorer = new Scoring();
-        var score = scorer.CalculateScore(mapData.MapName, solution, mapData, generalData);
+        var scorer = new Scoring(generalData, mapData);
+        var score = scorer.CalculateScore(solution);
         
-        Trace.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
         
         Assert.IsTrue(score.GameScore!.Total >= 56_826_754);
     }
@@ -56,8 +56,6 @@ public class HenrikSolver1GöteborgTests
             
             mapData.locations.Add(loc.LocationName, loc);
         }
-        
-        
 
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
@@ -65,9 +63,9 @@ public class HenrikSolver1GöteborgTests
         var solver = new HenrikSolver1(generalData, mapData);
         var solution = solver.CalcSolution();
 
-        var scorer = new Scoring();
-        var score = scorer.CalculateScore(mapData.MapName, solution, mapData, generalData);
+        var scorer = new Scoring(generalData, mapData);
+        var score = scorer.CalculateScore(solution);
         
-        Trace.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
     }
 }

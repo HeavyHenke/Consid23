@@ -15,7 +15,7 @@ public class HenrikSolver1
 
     public SubmitSolution CalcSolution()
     {
-        var scorer = new Scoring();
+        var scorer = new Scoring(_generalData, _mapData);
 
         var sol = CreateStartPointByAddOneAt(scorer);
         
@@ -25,10 +25,10 @@ public class HenrikSolver1
         // Try -1 and +1 on all (one at a time)
         while (true)
         {
-            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var preScore = scorer.CalculateScore(sol);
             RemoveOneFromAll(scorer, sol);
             AddOneForAll(scorer, sol);
-            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var postScore = scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) <= 0)
                 break;
@@ -91,7 +91,7 @@ public class HenrikSolver1
             {
                 AddOneAt(sol, loc.Key);
 
-                var score = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+                var score = scorer.CalculateScore(sol);
 
                 if (score.Locations[loc.Key].SalesCapacity > score.Locations[loc.Key].SalesVolume)
                     break;
@@ -103,7 +103,7 @@ public class HenrikSolver1
     
     private void TryMinusOneAndPlusTwoOnNeighbours(Scoring scorer, SubmitSolution sol)
     {
-        var bestSore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+        var bestSore = scorer.CalculateScore(sol);
         foreach (var (loc, locData) in _mapData.locations)
         {
             var s = sol;
@@ -125,7 +125,7 @@ public class HenrikSolver1
                 }
             }
 
-            var max = solutions.MaxBy(s => s.scoreDiff);
+            var max = solutions.MaxBy(q => q.scoreDiff);
             if (max.scoreDiff > 0)
             {
                 Console.WriteLine("Successful move with diff2: " + max.scoreDiff);
@@ -170,7 +170,7 @@ public class HenrikSolver1
     }
     private void TryPlusOneAndMinusTwoOnNeighbours(Scoring scorer, ref SubmitSolution sol)
     {
-        var bestSore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+        var bestSore = scorer.CalculateScore(sol);
         foreach (var (loc, locData) in _mapData.locations)
         {
             var s = sol;
@@ -192,7 +192,7 @@ public class HenrikSolver1
                 }
             }
 
-            var max = solutions.MaxBy(s => s.scoreDiff);
+            var max = solutions.MaxBy(q => q.scoreDiff);
             if (max.scoreDiff > 0)
             {
                 Console.WriteLine("Successful move with diff: " + max.scoreDiff);
@@ -204,7 +204,7 @@ public class HenrikSolver1
     
     private (SubmitSolution sol, GameData score, double scoreDiff) ScoreWhenChanged(Scoring scorer, SubmitSolution startSol, params (string loc, bool add)[] changes)
     {
-        var preScore = scorer.CalculateScore(_mapData.MapName, startSol, _mapData, _generalData);
+        var preScore = scorer.CalculateScore(startSol);
         var sol = startSol.Clone();
         foreach (var (loc, add) in changes)
         {
@@ -222,7 +222,7 @@ public class HenrikSolver1
             }
         }
         
-        var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+        var postScore = scorer.CalculateScore(sol);
         var scoreDiff = ScoreDiff(postScore, preScore);
         return (sol, postScore, scoreDiff);
     }
@@ -231,9 +231,9 @@ public class HenrikSolver1
     {
         foreach (var loc in _mapData.locations.Keys)
         {
-            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var preScore = scorer.CalculateScore(sol);
             RemoveOne(sol, loc);
-            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var postScore = scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) < 0)
                 AddOneAt(sol, loc);
@@ -244,9 +244,9 @@ public class HenrikSolver1
     {
         foreach (var loc in _mapData.locations.Keys)
         {
-            var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var preScore = scorer.CalculateScore(sol);
             AddOneAt(sol, loc);
-            var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
+            var postScore = scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) < 0)
                 RemoveOne(sol, loc);
