@@ -70,7 +70,7 @@ public class HenrikSolver1GöteborgTests
     }
     
     [TestMethod]
-    public void SolveGöteborgPlus1600()
+    public void SolveGöteborgPlus1700()
     {
         var mapDataJson = File.ReadAllText("goteborg.cached.json");
         var mapData = JsonConvert.DeserializeObject<MapData>(mapDataJson)!;
@@ -79,8 +79,8 @@ public class HenrikSolver1GöteborgTests
         mapData.Border.LatitudeMax += (mapData.Border.LatitudeMax - mapData.Border.LatitudeMin); 
         mapData.Border.LongitudeMax += (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin); 
         
-        var rnd = new Random();
-        for (int i = 0; i < 1600; i++)
+        var rnd = new Random(1337);
+        for (int i = 0; i < 1700; i++)
         {
             var longitud = mapData.Border.LongitudeMin + rnd.NextDouble() * (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin);
             var latitude = mapData.Border.LatitudeMin + rnd.NextDouble() * (mapData.Border.LatitudeMax - mapData.Border.LatitudeMin);

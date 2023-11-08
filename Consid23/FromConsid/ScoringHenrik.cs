@@ -45,7 +45,7 @@ public class ScoringHenrik : IScoring
         {
             if (solution.Locations.TryGetValue(kvp.Key, out var loc))
             {
-                scored.Locations[kvp.Key] = new()
+                var storeLocationScoring = new StoreLocationScoring()
                 {
                     LocationName = kvp.Value.LocationName,
                     LocationType = kvp.Value.LocationType,
@@ -56,19 +56,18 @@ public class ScoringHenrik : IScoring
                     Freestyle9100Count = loc.Freestyle9100Count,
 
                     SalesVolume = kvp.Value.SalesVolume * _generalData.RefillSalesFactor,
-                    // await GetSalesVolume(kvp.Value.LocationType) ??
-                    //     throw new Exception(string.Format("Location: {0}, have an invalid location type: {1}", kvp.Key, kvp.Value.LocationType)),
 
                     SalesCapacity = loc.Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek +
                                     loc.Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek,
 
-                    LeasingCost = solution.Locations[kvp.Key].Freestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek +
-                                  solution.Locations[kvp.Key].Freestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek
+                    LeasingCost = loc.Freestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek +
+                                  loc.Freestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek
                 };
+                scored.Locations[kvp.Key] = storeLocationScoring;
 
-                if (scored.Locations[kvp.Key].SalesCapacity > 0 == false)
+                if (storeLocationScoring.SalesCapacity > 0 == false)
                 {
-                    throw new Exception(string.Format("You are not allowed to submit locations with no refill stations. Remove or alter location : {0}", kvp.Value.LocationName));
+                    throw new Exception($"You are not allowed to submit locations with no refill stations. Remove or alter location : {kvp.Value.LocationName}");
                 }
             }
             else
@@ -79,7 +78,6 @@ public class ScoringHenrik : IScoring
                     Latitude = kvp.Value.Latitude,
                     Longitude = kvp.Value.Longitude,
                     SalesVolume = kvp.Value.SalesVolume * _generalData.RefillSalesFactor,
-                    //await GetSalesVolume(kvp.Value.LocationType) ?? throw new Exception(string.Format("Location: {0}, have an invalid location type: {1}", kvp.Key, kvp.Value.LocationType)),
                 };
         }
 
@@ -87,7 +85,6 @@ public class ScoringHenrik : IScoring
         {
             scored.GameScore.Total = int.MinValue;
             return scored;
-            // throw new Exception(string.Format("No valid locations with refill stations were placed for map: {0}", mapName));
         }
         scored.Locations = DistributeSales(scored.Locations, locationListNoRefillStation);
 
@@ -120,8 +117,6 @@ public class ScoringHenrik : IScoring
             scored.TotalFreestyle9100Count += kvp.Value.Freestyle9100Count;
 
             scored.GameScore.TotalFootfall += kvp.Value.Footfall;
-
-
         }
 
         //Just some rounding for nice whole numbers
