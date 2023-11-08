@@ -53,7 +53,7 @@ public class SolutionSubmitter : ISolutionSubmitter
 
             if (submitList.Count > 0)
             {
-                var bestScoreItem = submitList.OrderBy(s => scoring.CalculateScore(s).GameScore!.Total).First();
+                var bestScoreItem = submitList.OrderByDescending(s => scoring.CalculateScore(s).GameScore!.Total).First();
                 var score = _api.Sumbit(_mapData.MapName, bestScoreItem, _apiKey);
                 Console.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}. Skipped {submitList.Count - 1} items int submit list.");
             }

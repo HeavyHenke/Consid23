@@ -21,6 +21,7 @@ public class HenrikSolver1
     {
         var sol = CreateStartPointByAddOneAt();
         _solutionSubmitter.AddSolutionToSubmit(sol);
+        _solutionSubmitter.AddSolutionToSubmit(CreateStartPointBySalesVolume());
         
         // Does not help :(
         //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
