@@ -1,8 +1,9 @@
-﻿using Considition2023_Cs;
+﻿using System.Net.Http.Headers;
+using Considition2023_Cs;
 
 namespace Consid23;
 
-public class HenrikSolverOnePoint
+internal class HenrikSolverOnePoint
 {
     private readonly GeneralData _generalData;
     private readonly MapData _mapData;
@@ -98,6 +99,27 @@ public class HenrikSolverOnePoint
         return bestSol;
     }
 
+    public async Task Submit100Games(Api api, string apiKey)
+    {
+        var sol = new SubmitSolution
+        {
+            Locations = new Dictionary<string, PlacedLocations>()
+        };
+        for (int i = 0; i < 100; i++)
+        {
+            sol.Locations.Add(_mapData.locations.Skip(i).First().Key, new PlacedLocations
+            {
+                Freestyle3100Count = 1,
+                Freestyle9100Count = 1
+            });
+
+            var result = await api.SumbitAsync(_mapData.MapName, sol, apiKey);
+            Console.WriteLine($"Game {i} got score: {result.GameScore!.Total}");
+            Thread.Sleep(2000);
+        }
+    }
+    
+    
     private static bool IsBetterScore(GameData score2, GameData score)
     {
         return Math.Abs(1337 - score2.GameScore.Total) > Math.Abs(1337 - score.GameScore.Total);

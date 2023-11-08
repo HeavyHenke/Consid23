@@ -2,16 +2,18 @@
 
 public static class MapNames
 {
-    public static string Stockholm { get; } = "stockholm";
-    public static string Goteborg { get; } = "goteborg";
-    public static string Malmo { get; } = "malmo";
-    public static string Uppsala { get; } = "uppsala";
+    // Training
     public static string Vasteras { get; } = "vasteras";
+    public static string Uppsala { get; } = "uppsala";
+    public static string Linkoping { get; } = "linkoping";
+    public static string Goteborg { get; } = "goteborg";
+
+    // Competition
+    public static string Stockholm { get; } = "stockholm";
     public static string Orebro { get; } = "orebro";
+    public static string Malmo { get; } = "malmo";
     public static string London { get; } = "london";
     public static string Berlin { get; } = "berlin";
-    public static string Linkoping { get; } = "linkoping";
-
 }
 
 public static class LocationKeys
