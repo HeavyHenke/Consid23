@@ -10,4 +10,8 @@ public class DummySubmitter : ISolutionSubmitter
     {
         JsonConvert.SerializeObject(sol);   // To measure the cost
     }
+
+    public void Dispose()
+    {
+    }
 }

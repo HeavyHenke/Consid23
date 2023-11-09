@@ -36,13 +36,13 @@ const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 //     return;
 // }
 
-var mapName = MapNames.Uppsala;
+var mapName = MapNames.Goteborg;
 
 HttpClient client = new();
 Api api = new(client);
 MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
-var submitter = new SolutionSubmitter(api, apikey, generalData, mapData);
+ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
 // await new HenrikSolverOnePoint(generalData, mapData).Submit100Games(api, apikey);
 

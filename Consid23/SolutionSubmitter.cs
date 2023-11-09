@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Consid23;
 
-public interface ISolutionSubmitter
+public interface ISolutionSubmitter : IDisposable
 {
     void AddSolutionToSubmit(SubmitSolution sol);
 }
