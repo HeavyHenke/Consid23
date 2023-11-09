@@ -107,9 +107,9 @@ public class HenrikSolver1
         return sol;
     }
     
-    private void TryMinusOneAndPlusTwoOnNeighbours(Scoring scorer, SubmitSolution sol)
+    private void TryMinusOneAndPlusTwoOnNeighbours(ref SubmitSolution sol)
     {
-        var bestSore = scorer.CalculateScore(sol);
+        var bestSore = _scorer.CalculateScore(sol);
         foreach (var (loc, locData) in _mapData.locations)
         {
             var s = sol;
@@ -125,7 +125,7 @@ public class HenrikSolver1
             {
                 for (int j = i; j < neighbours.Count; j++)
                 {
-                    var scoreWhenChanged = ScoreWhenChanged(scorer, sol, (loc, false), (neighbours[i].LocationName, true), (neighbours[j].LocationName, true));
+                    var scoreWhenChanged = ScoreWhenChanged(sol, (loc, false), (neighbours[i].LocationName, true), (neighbours[j].LocationName, true));
                     if(scoreWhenChanged != default)
                         solutions.Add(scoreWhenChanged);
                 }
@@ -141,7 +141,7 @@ public class HenrikSolver1
         }
     }
 
-    private void TryPlusOneAndMinusThreeOnNeighbours(Scoring scorer, ref SubmitSolution sol)
+    private void TryPlusOneAndMinusThreeOnNeighbours(ref SubmitSolution sol)
     {
         foreach (var (loc, locData) in _mapData.locations)
         {
@@ -159,7 +159,7 @@ public class HenrikSolver1
                 {
                     for (int k = j; k < neighbours.Count; k++)
                     {
-                        var scoreWhenChanged = ScoreWhenChanged(scorer, sol, (loc, true), (neighbours[i].LocationName, false), (neighbours[j].LocationName, false), (neighbours[k].LocationName, false));
+                        var scoreWhenChanged = ScoreWhenChanged(sol, (loc, true), (neighbours[i].LocationName, false), (neighbours[j].LocationName, false), (neighbours[k].LocationName, false));
                         if(scoreWhenChanged != default)
                             solutions.Add(scoreWhenChanged);
                     }
@@ -174,9 +174,9 @@ public class HenrikSolver1
             }
         }
     }
-    private void TryPlusOneAndMinusTwoOnNeighbours(Scoring scorer, ref SubmitSolution sol)
+    private void TryPlusOneAndMinusTwoOnNeighbours(ref SubmitSolution sol)
     {
-        var bestSore = scorer.CalculateScore(sol);
+        var bestSore = _scorer.CalculateScore(sol);
         foreach (var (loc, locData) in _mapData.locations)
         {
             var s = sol;
@@ -192,7 +192,7 @@ public class HenrikSolver1
             {
                 for (int j = i; j < neighbours.Count; j++)
                 {
-                    var scoreWhenChanged = ScoreWhenChanged(scorer, sol, (loc, true), (neighbours[i].LocationName, false), (neighbours[j].LocationName, false));
+                    var scoreWhenChanged = ScoreWhenChanged(sol, (loc, true), (neighbours[i].LocationName, false), (neighbours[j].LocationName, false));
                     if(scoreWhenChanged != default)
                         solutions.Add(scoreWhenChanged);
                 }
@@ -208,9 +208,9 @@ public class HenrikSolver1
         }
     }
     
-    private (SubmitSolution sol, GameData score, double scoreDiff) ScoreWhenChanged(Scoring scorer, SubmitSolution startSol, params (string loc, bool add)[] changes)
+    private (SubmitSolution sol, GameData score, double scoreDiff) ScoreWhenChanged(SubmitSolution startSol, params (string loc, bool add)[] changes)
     {
-        var preScore = scorer.CalculateScore(startSol);
+        var preScore = _scorer.CalculateScore(startSol);
         var sol = startSol.Clone();
         foreach (var (loc, add) in changes)
         {
@@ -228,7 +228,7 @@ public class HenrikSolver1
             }
         }
         
-        var postScore = scorer.CalculateScore(sol);
+        var postScore = _scorer.CalculateScore(sol);
         var scoreDiff = ScoreDiff(postScore, preScore);
         return (sol, postScore, scoreDiff);
     }

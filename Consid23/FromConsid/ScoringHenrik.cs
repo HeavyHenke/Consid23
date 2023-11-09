@@ -121,7 +121,7 @@ public class ScoringHenrik : IScoring
         }
 
         //Just some rounding for nice whole numbers
-        scored.TotalRevenue = (long)(scored.TotalRevenue + .5);
+        scored.TotalRevenue = Math.Round(scored.TotalRevenue, 0);
         scored.GameScore.KgCo2Savings = Math.Round(
             scored.GameScore.KgCo2Savings
             - scored.TotalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000

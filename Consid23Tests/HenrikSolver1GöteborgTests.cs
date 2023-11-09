@@ -38,7 +38,7 @@ public class HenrikSolver1GöteborgTests
         mapData.Border.LatitudeMax += (mapData.Border.LatitudeMax - mapData.Border.LatitudeMin); 
         mapData.Border.LongitudeMax += (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin); 
         
-        var rnd = new Random();
+        var rnd = new Random(1337);
         for (int i = 0; i < 300; i++)
         {
             var longitud = mapData.Border.LongitudeMin + rnd.NextDouble() * (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin);
@@ -108,5 +108,6 @@ public class HenrikSolver1GöteborgTests
         var score = scorer.CalculateScore(solution);
         
         Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        // Gives score: 74739633967
     }
 }
