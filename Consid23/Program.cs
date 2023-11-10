@@ -49,7 +49,9 @@ ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData
 // mapData.RandomizeLocationOrder();
 
 
-var solution = new HenrikSolver1(generalData, mapData, submitter).CalcSolution();
+var startPoint = new HenrikSolver1(generalData, mapData, submitter).CreateStartPointByAddOneAt();
+var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
+
 submitter.AddSolutionToSubmit(solution);
 submitter.Dispose();
 

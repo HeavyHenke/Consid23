@@ -21,6 +21,7 @@ namespace Considition2023_Cs
 
         public readonly List<(int index, double distanceScaleFactor)>[] Neighbours;
 
+        [DebuggerDisplay("{Freestyle9100Count} + {Freestyle3100Count}")]
         public struct SolutionLocation
         {
             public int Freestyle9100Count;

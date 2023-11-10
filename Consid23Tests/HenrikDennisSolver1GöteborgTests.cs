@@ -89,7 +89,6 @@ public class HenrikDennisSolver1GöteborgTests
         
         // Now:
         // 518029561620
-        // 
         */
 
         var scorer = new Scoring(generalData, mapData);

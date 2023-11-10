@@ -16,7 +16,7 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
     public void AddSolutionToSubmit(SubmitSolution sol)
     {
         var score = _scorer.CalculateScore(sol);
-        Console.WriteLine($"Not submitting (ConsoleOnlySubmitter! GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        Console.WriteLine($"Not submitting (ConsoleOnlySubmitter) GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
     }
 
     public void Dispose()

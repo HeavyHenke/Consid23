@@ -6,18 +6,20 @@ public class HenrikDennisSolver1
 {
     private readonly DennisModel _model;
     private readonly ISolutionSubmitter _solutionSubmitter;
+    private ScoringHenrik _scorer2;
 
     public HenrikDennisSolver1(GeneralData generalData, MapData mapData, ISolutionSubmitter solutionSubmitter)
     {
         _model = new DennisModel(generalData, mapData);
         _solutionSubmitter = solutionSubmitter;
+        _scorer2 = new ScoringHenrik(generalData, mapData);
     }
 
     public SubmitSolution OptimizeSolution(SubmitSolution submitSolution)
     {
         var sol = _model.ConvertFromSubmitSolution(submitSolution);
 
-        // Try -1 and +1 on all (one at a time)
+        
         var currScore = _model.CalculateScore(sol);
         while (true)
         {
@@ -25,7 +27,9 @@ public class HenrikDennisSolver1
             {
                 RemoveOneFromAll(sol),
                 AddOneForAll(sol),
-                TryPlusOneAndMinusTwoOnNeighbours(sol)
+                TryPlusOneAndMinusOneOnNeighbour(sol),
+                TryPlusOneAndMinusTwoOnNeighbours(sol),
+                TryPlusOneAndMinusThreeOnNeighbours(sol)
             };
 
             var best = optimizations.MaxBy(o => o.score);
@@ -33,11 +37,17 @@ public class HenrikDennisSolver1
                 break;
 
             var ix = optimizations.IndexOf(best);
-            Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore}");
+            Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore} total score {best.score}");
 
+            
             sol = best.sol;
             currScore = best.score;
             _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
+
+            var scoreDiff = _scorer2.CalculateScore(_model.ConvertToSubmitSolution(sol)).GameScore!.Total - _model.CalculateScore(sol); 
+            if(scoreDiff != 0)
+                Console.WriteLine($"Error in score calc {scoreDiff}");
+
         }
 
         return _model.ConvertToSubmitSolution(sol);
@@ -82,6 +92,51 @@ public class HenrikDennisSolver1
         return (sol, currScore);
     }
 
+    private (DennisModel.SolutionLocation[] sol, double score) TryPlusOneAndMinusOneOnNeighbour(DennisModel.SolutionLocation[] original)
+    {
+        var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var currScore = _model.CalculateScore(sol);
+        
+        for (int i = 0; i < _model.Locations.Length; i++)
+        {
+            if (sol[i].Freestyle9100Count == 5 && sol[i].Freestyle3100Count == 5)
+                continue;
+
+            var neighbours = _model.Neighbours[i];
+            if (neighbours.Count == 0)
+                continue;
+
+            var clone = (DennisModel.SolutionLocation[])sol.Clone();
+            if (AddOneAt(clone, i) == false)
+                continue;
+
+            var bestClone = clone;
+            var bestScore = currScore;
+
+            for (int a = 0; a < neighbours.Count; a++)
+            {
+                var aIndex = neighbours[a].index;
+                if (RemoveOne(clone, aIndex) == false)
+                    continue;
+
+                var score = _model.CalculateScore(clone);
+                if (score > bestScore)
+                {
+                    bestClone = (DennisModel.SolutionLocation[])clone.Clone();
+                    bestScore = score;
+                }
+
+                AddOneAt(clone, aIndex);    // Reset to old sate
+            }
+
+            sol = bestClone;
+            currScore = bestScore;
+        }
+
+        return (sol, currScore);
+    }
+
+    
     private (DennisModel.SolutionLocation[] sol, double score) TryPlusOneAndMinusTwoOnNeighbours(DennisModel.SolutionLocation[] original)
     {
         var sol = (DennisModel.SolutionLocation[])original.Clone();
@@ -121,6 +176,69 @@ public class HenrikDennisSolver1
                         bestClone = (DennisModel.SolutionLocation[])clone.Clone();
                         bestScore = score;
                     }
+
+                    AddOneAt(clone, bIndex);    // Reset to old sate
+                }
+
+                AddOneAt(clone, aIndex);    // Reset to old sate
+            }
+
+            sol = bestClone;
+            currScore = bestScore;
+        }
+
+        return (sol, currScore);
+    }
+
+    private (DennisModel.SolutionLocation[] sol, double score) TryPlusOneAndMinusThreeOnNeighbours(DennisModel.SolutionLocation[] original)
+    {
+        var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var currScore = _model.CalculateScore(sol);
+        
+        for (int i = 0; i < _model.Locations.Length; i++)
+        {
+            if (sol[i].Freestyle9100Count == 5 && sol[i].Freestyle3100Count == 5)
+                continue;
+
+            var neighbours = _model.Neighbours[i];
+            if (neighbours.Count == 0)
+                continue;
+
+            var clone = (DennisModel.SolutionLocation[])sol.Clone();
+            if (AddOneAt(clone, i) == false)
+                continue;
+
+            var bestClone = clone;
+            var bestScore = currScore;
+
+            for (int a = 0; a < neighbours.Count; a++)
+            {
+                var aIndex = neighbours[a].index;
+                if (RemoveOne(clone, aIndex) == false)
+                    continue;
+
+                for (int b = a; b < neighbours.Count; b++)
+                {
+                    var bIndex = neighbours[b].index;
+                    if (RemoveOne(clone, bIndex) == false)
+                        continue;
+
+                    for (int c = b; c < neighbours.Count; c++)
+                    {
+                        var cIndex = neighbours[c].index;
+                        if(RemoveOne(clone, c) == false)
+                            continue;
+                        
+                        var score = _model.CalculateScore(clone);
+                        if (score > bestScore)
+                        {
+                            bestClone = (DennisModel.SolutionLocation[])clone.Clone();
+                            bestScore = score;
+                        }
+
+                        AddOneAt(clone, c); // Reset to old sate
+                    }
+                    
 
                     AddOneAt(clone, bIndex);    // Reset to old sate
                 }
