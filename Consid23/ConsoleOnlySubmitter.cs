@@ -1,4 +1,5 @@
 ﻿using Considition2023_Cs;
+using Newtonsoft.Json;
 
 namespace Consid23;
 
@@ -6,9 +7,13 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
 {
     private readonly Scoring _scorer;
     private readonly GeneralData _generalData;
+    private readonly MapData _mapData;
 
+    private double _maxSubmitted = 0;
+    
     public ConsoleOnlySubmitter(Api api, string apiKey, GeneralData generalData, MapData mapData)
     {
+        _mapData = mapData;
         _generalData = generalData;
         _scorer = new Scoring(generalData, mapData);
     }
@@ -17,6 +22,14 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
     {
         var score = _scorer.CalculateScore(sol);
         Console.WriteLine($"Not submitting (ConsoleOnlySubmitter) GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+
+        if (score.GameScore.Total > _maxSubmitted)
+        {
+            _maxSubmitted = score.GameScore.Total;
+            var time = DateTime.Now.ToString("dd_hh_mm_ss");
+            var filename = $"{_mapData.MapName}_{score.GameScore.Total}_{time}.json";
+            File.WriteAllText(filename, JsonConvert.SerializeObject(sol));
+        }
     }
 
     public void Dispose()
