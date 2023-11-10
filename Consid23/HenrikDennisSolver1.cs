@@ -27,7 +27,7 @@ public class HenrikDennisSolver1
             {
                 RemoveOneFromAll(sol),
                 AddOneForAll(sol),
-                TryPlusOneAndMinusOneOnNeighbour(sol),
+                //TryPlusOneAndMinusOneOnNeighbour(sol),
                 TryPlusOneAndMinusTwoOnNeighbours(sol),
                 TryPlusOneAndMinusThreeOnNeighbours(sol)
             };
@@ -110,7 +110,7 @@ public class HenrikDennisSolver1
             if (AddOneAt(clone, i) == false)
                 continue;
 
-            var bestClone = clone;
+            var bestClone = sol;
             var bestScore = currScore;
 
             for (int a = 0; a < neighbours.Count; a++)
@@ -131,11 +131,11 @@ public class HenrikDennisSolver1
 
             sol = bestClone;
             currScore = bestScore;
+   
         }
-
+        
         return (sol, currScore);
     }
-
     
     private (DennisModel.SolutionLocation[] sol, double score) TryPlusOneAndMinusTwoOnNeighbours(DennisModel.SolutionLocation[] original)
     {
@@ -155,7 +155,7 @@ public class HenrikDennisSolver1
             if (AddOneAt(clone, i) == false)
                 continue;
 
-            var bestClone = clone;
+            var bestClone = sol;
             var bestScore = currScore;
 
             for (int a = 0; a < neighbours.Count; a++)
@@ -208,7 +208,7 @@ public class HenrikDennisSolver1
             if (AddOneAt(clone, i) == false)
                 continue;
 
-            var bestClone = clone;
+            var bestClone = sol;
             var bestScore = currScore;
 
             for (int a = 0; a < neighbours.Count; a++)
@@ -272,20 +272,19 @@ public class HenrikDennisSolver1
 
     private static bool RemoveOne(DennisModel.SolutionLocation[] sol, int index)
     {
-        var loc = sol[index];
-        if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })
-        {
-            return false;
-        }
-
-        if (loc.Freestyle3100Count > 0)
+        if (sol[index].Freestyle3100Count > 0)
         {
             sol[index].Freestyle3100Count--;
             return true;
         }
 
-        sol[index].Freestyle9100Count--;
-        sol[index].Freestyle3100Count++;
-        return true;
+        if (sol[index].Freestyle9100Count > 0)
+        {
+            sol[index].Freestyle9100Count--;
+            sol[index].Freestyle3100Count++;
+            return true;
+        }
+
+        return false;
     }
 }

@@ -64,38 +64,37 @@ public class HenrikDennisSolver1GöteborgTests
 
         var startPoint = new HenrikSolver1(generalData, mapData, new DummySubmitter()).CreateStartPointByAddOneAt();
 
-        /*
-        double bestScore = 0;
-        for (int i = 0; i < 300; i++)
-        {
-            mapData.RandomizeLocationOrder(i+700);
-            
-            var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
-            var solution = solver.OptimizeSolution(startPoint);
-
-            var scorer = new Scoring(generalData, mapData);
-            var score = scorer.CalculateScore(solution);
-
-            Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
-
-            if (score.GameScore.Total > bestScore)
-                bestScore = score.GameScore.Total;
-        } 
-
-        Console.WriteLine("Best score: " + bestScore);
+        
+        // double bestScore = 0;
+        // for (int i = 0; i < 300; i++)
+        // {
+        //     mapData.RandomizeLocationOrder(i+700);
+        //     
+        //     var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
+        //     var solution = solver.OptimizeSolution(startPoint);
+        //
+        //     var scorer = new Scoring(generalData, mapData);
+        //     var score = scorer.CalculateScore(solution);
+        //
+        //     Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        //
+        //     if (score.GameScore.Total > bestScore)
+        //         bestScore = score.GameScore.Total;
+        // } 
+        //
+        // Console.WriteLine("Best score: " + bestScore);
 
         // Best max found:
-        // 518227200764
+        // 518437231967
         
         // Now:
-        // 518029561620
-        */
-
+        // 518354687010
+        
         var scorer = new Scoring(generalData, mapData);
         var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
         var sol = solver.OptimizeSolution(startPoint);
         var score = scorer.CalculateScore(sol);
-
+        
         Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
     }
 
