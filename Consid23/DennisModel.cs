@@ -155,7 +155,7 @@ namespace Considition2023_Cs
                     continue;
 
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
-                var sales = Math.Min(Math.Round(solutionLocations[i].MaxSalesVolume, 0), salesCapacity);
+                var sales = Math.Min(Round(solutionLocations[i].MaxSalesVolume), salesCapacity);
 
                 kgCo2Savings += sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams) / 1000;
 
@@ -169,14 +169,19 @@ namespace Considition2023_Cs
             }
 
             //Just some rounding for nice whole numbers
-            totalRevenue = Math.Round(totalRevenue, 0);
-            kgCo2Savings = Math.Round(kgCo2Savings - totalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000 - totalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000, 0);
+            totalRevenue = Round(totalRevenue);
+            kgCo2Savings = Round(kgCo2Savings - totalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000 - totalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000);
 
             //Calculate Earnings
             var earnings = totalRevenue - totalLeasingCost;
 
             //Calculate total score
-            return Math.Round((kgCo2Savings * _generalData.Co2PricePerKiloInSek + earnings) * (1 + totalFootfall), 0);
+            return Round((kgCo2Savings * _generalData.Co2PricePerKiloInSek + earnings) * (1 + totalFootfall));
+        }
+
+        long Round(double d)
+        {
+            return (long)(d+.5);
         }
     }
 }
