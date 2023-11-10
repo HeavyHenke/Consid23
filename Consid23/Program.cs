@@ -44,7 +44,7 @@ MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
-Parallel.For(1, 1000, DoWorkInOneThread);
+Parallel.For(1, 10, DoWorkInOneThread);
 
 // await new HenrikSolverOnePoint(generalData, mapData).Submit100Games(api, apikey);
 
@@ -55,6 +55,8 @@ Parallel.For(1, 1000, DoWorkInOneThread);
 // var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
 
 submitter.Dispose();
+Console.WriteLine("Done!");
+return;
 
 
 void DoWorkInOneThread(int ix)
