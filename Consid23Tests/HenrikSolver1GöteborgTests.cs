@@ -62,8 +62,10 @@ public class HenrikSolver1GöteborgTests
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
-        var solver = new HenrikSolver1(generalData, mapData, new DummySubmitter());
-        var solution = solver.CalcSolution();
+        var startPoint = new HenrikSolver1(generalData, mapData, new DummySubmitter()).CreateStartPointByAddOneAt();
+        
+        var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
+        var solution = solver.OptimizeSolution(startPoint);
 
         var scorer = new Scoring(generalData, mapData);
         var score = scorer.CalculateScore(solution);
@@ -71,10 +73,12 @@ public class HenrikSolver1GöteborgTests
         Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
         
         // 518411259617
+        
+        // 518363357243
     }
     
     [TestMethod]
-    public void SolveGöteborgPlus2600()
+    public void SolveGöteborgPlus5100()
     {
         var mapDataJson = File.ReadAllText("goteborg.cached.json");
         var mapData = JsonConvert.DeserializeObject<MapData>(mapDataJson)!;
@@ -84,7 +88,7 @@ public class HenrikSolver1GöteborgTests
         mapData.Border.LongitudeMax += 2*(mapData.Border.LongitudeMax - mapData.Border.LongitudeMin); 
         
         var rnd = new Random(1337);
-        for (int i = 0; i < 2600; i++)
+        for (int i = 0; i < 5100; i++)
         {
             var longitud = mapData.Border.LongitudeMin + rnd.NextDouble() * (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin);
             var latitude = mapData.Border.LatitudeMin + rnd.NextDouble() * (mapData.Border.LatitudeMax - mapData.Border.LatitudeMin);
@@ -105,8 +109,10 @@ public class HenrikSolver1GöteborgTests
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
-        var solver = new HenrikSolver1(generalData, mapData, new DummySubmitter());
-        var solution = solver.CalcSolution();
+        var startPoint = new HenrikSolver1(generalData, mapData, new DummySubmitter()).CreateStartPointByAddOneAt();
+        
+        var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
+        var solution = solver.OptimizeSolution(startPoint);
 
         var scorer = new Scoring(generalData, mapData);
         var score = scorer.CalculateScore(solution);

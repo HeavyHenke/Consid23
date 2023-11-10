@@ -84,7 +84,7 @@ public class HenrikSolver1
         return sol;
     }
 
-    private SubmitSolution CreateStartPointByAddOneAt()
+    public SubmitSolution CreateStartPointByAddOneAt()
     {
         var sol = new SubmitSolution
         {
