@@ -145,13 +145,10 @@ namespace Considition2023_Cs
                 }
             }
 
-            double kgCo2Savings = 0;
-            double totalRevenue = 0;
-            double totalLeasingCost = 0;
             int totalFreestyle3100Count = 0;
             int totalFreestyle9100Count = 0;
             double totalFootfall = 0;
-
+            double totalSales = 0;
             for (var i = 0; i < _numLocations; i++)
             {
                 if (solutionLocations[i].Freestyle3100Count == 0 && solutionLocations[i].Freestyle9100Count == 0)
@@ -160,20 +157,20 @@ namespace Considition2023_Cs
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
                 var sales = Math.Min(Round(salesVolume[i]), salesCapacity);
 //                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
-                kgCo2Savings += sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams);
-
-                totalRevenue += sales * _generalData.RefillUnitData.ProfitPerUnit;
-                totalLeasingCost += solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek;
+                totalSales += sales;
 
                 totalFreestyle3100Count += solutionLocations[i].Freestyle3100Count;
                 totalFreestyle9100Count += solutionLocations[i].Freestyle9100Count;
 
                 totalFootfall += Locations[i].Footfall;
             }
-            kgCo2Savings /= 1000;
+
+            var totalLeasingCost = totalFreestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek + totalFreestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek;
+            var kgCo2Savings = totalSales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams) / 1000;
+            var totalRevenue = Round(totalSales * _generalData.RefillUnitData.ProfitPerUnit);
+
             
             //Just some rounding for nice whole numbers
-            totalRevenue = Round(totalRevenue);
             kgCo2Savings = Round(kgCo2Savings - totalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000 - totalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000);
 
             //Calculate Earnings
