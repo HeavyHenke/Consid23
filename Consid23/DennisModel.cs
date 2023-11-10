@@ -25,7 +25,6 @@ namespace Considition2023_Cs
         {
             public int Freestyle9100Count;
             public int Freestyle3100Count;
-            public double MaxSalesVolume;
         }
 
         public SolutionLocation[] CreateSolutionLocations()
@@ -109,17 +108,21 @@ namespace Considition2023_Cs
             }
         }
 
-        public double CalculateScore(SolutionLocation[] solutionLocations)
+        public double CalculateScore(SolutionLocation[] solutionLocations, double[] salesVolume=null)
         {
-//            var salesVolume = new double[_numLocations];
+            if (salesVolume == null)
+                salesVolume = new double[_numLocations];
+            else
+                Array.Clear(salesVolume);
+            
             for (var i = 0; i < _numLocations; i++)
-                solutionLocations[i].MaxSalesVolume = 0;
+                salesVolume[i] = 0;
 
             for (var i = 0; i < _numLocations; i++)
             {
                 if (solutionLocations[i].Freestyle3100Count != 0 || solutionLocations[i].Freestyle9100Count != 0)
                 {
-                    solutionLocations[i].MaxSalesVolume += Locations[i].SalesVolume * _generalData.RefillSalesFactor;
+                    salesVolume[i] += Locations[i].SalesVolume * _generalData.RefillSalesFactor;
                 }
                 else
                 {
@@ -137,7 +140,7 @@ namespace Considition2023_Cs
                     //Add boosted sales to original sales volume
                     foreach (var neighbour in Neighbours[i])
                     {
-                        solutionLocations[neighbour.index].MaxSalesVolume += neighbour.distanceScaleFactor / total * _generalData.RefillDistributionRate * currentSalesVolume;
+                        salesVolume[neighbour.index] += neighbour.distanceScaleFactor / total * _generalData.RefillDistributionRate * currentSalesVolume;
                     }
                 }
             }
@@ -155,7 +158,7 @@ namespace Considition2023_Cs
                     continue;
 
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
-                var sales = Math.Min(Round(solutionLocations[i].MaxSalesVolume), salesCapacity);
+                var sales = Math.Min(Round(salesVolume[i]), salesCapacity);
 
                 kgCo2Savings += sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams) / 1000;
 
