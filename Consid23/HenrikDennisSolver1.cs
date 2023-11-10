@@ -6,13 +6,11 @@ public class HenrikDennisSolver1
 {
     private readonly DennisModel _model;
     private readonly ISolutionSubmitter _solutionSubmitter;
-    private ScoringHenrik _scorer2;
 
     public HenrikDennisSolver1(GeneralData generalData, MapData mapData, ISolutionSubmitter solutionSubmitter)
     {
         _model = new DennisModel(generalData, mapData);
         _solutionSubmitter = solutionSubmitter;
-        _scorer2 = new ScoringHenrik(generalData, mapData);
     }
 
     public SubmitSolution OptimizeSolution(SubmitSolution submitSolution)
@@ -27,7 +25,7 @@ public class HenrikDennisSolver1
             {
                 RemoveOneFromAll(sol),
                 AddOneForAll(sol),
-                //TryPlusOneAndMinusOneOnNeighbour(sol),
+                TryPlusOneAndMinusOneOnNeighbour(sol),
                 TryPlusOneAndMinusTwoOnNeighbours(sol),
                 TryPlusOneAndMinusThreeOnNeighbours(sol)
             };
@@ -43,11 +41,6 @@ public class HenrikDennisSolver1
             sol = best.sol;
             currScore = best.score;
             _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
-
-            var scoreDiff = _scorer2.CalculateScore(_model.ConvertToSubmitSolution(sol)).GameScore!.Total - _model.CalculateScore(sol); 
-            if(scoreDiff != 0)
-                Console.WriteLine($"Error in score calc {scoreDiff}");
-
         }
 
         return _model.ConvertToSubmitSolution(sol);
@@ -226,7 +219,7 @@ public class HenrikDennisSolver1
                     for (int c = b; c < neighbours.Count; c++)
                     {
                         var cIndex = neighbours[c].index;
-                        if(RemoveOne(clone, c) == false)
+                        if(RemoveOne(clone, cIndex) == false)
                             continue;
                         
                         var score = _model.CalculateScore(clone);
@@ -236,7 +229,7 @@ public class HenrikDennisSolver1
                             bestScore = score;
                         }
 
-                        AddOneAt(clone, c); // Reset to old sate
+                        AddOneAt(clone, cIndex); // Reset to old sate
                     }
                     
 
