@@ -109,7 +109,7 @@ namespace Considition2023_Cs
             }
         }
 
-        public double CalculateScore(SolutionLocation[] solutionLocations, double[] salesVolume=null)
+        public double CalculateScore(SolutionLocation[] solutionLocations, double[]? salesVolume=null)
         {
             if (salesVolume == null)
                 salesVolume = new double[_numLocations];
