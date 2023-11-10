@@ -14,7 +14,7 @@ namespace Considition2023_Cs
             public double Longitude { get; set; }
             public double Footfall { get; set; }
             public int footfallScale { get; set; }
-            public double SalesVolume { get; set; }
+            public double ScaledSalesVolume { get; set; }
         }
 
         public readonly Location[] Locations;
@@ -85,7 +85,7 @@ namespace Considition2023_Cs
                 Locations[index].Longitude = location.Value.Longitude;
                 Locations[index].Footfall = location.Value.Footfall;
                 Locations[index].footfallScale = location.Value.footfallScale;
-                Locations[index].SalesVolume = location.Value.SalesVolume;
+                Locations[index].ScaledSalesVolume = location.Value.SalesVolume * _generalData.RefillSalesFactor;
                 index++;
             }
 
@@ -102,8 +102,8 @@ namespace Considition2023_Cs
                     if (distance < _generalData.WillingnessToTravelInMeters)
                     {
                         var distanceScaleFactor = Math.Pow(_generalData.ConstantExpDistributionFunction, _generalData.WillingnessToTravelInMeters - distance) - 1;
-                        Neighbours[i].Add(new(j, distanceScaleFactor));
-                        Neighbours[j].Add(new(i, distanceScaleFactor));
+                        Neighbours[i].Add((j, distanceScaleFactor));
+                        Neighbours[j].Add((i, distanceScaleFactor));
                     }
                 }
             }
@@ -120,7 +120,7 @@ namespace Considition2023_Cs
             {
                 if (solutionLocations[i].Freestyle3100Count != 0 || solutionLocations[i].Freestyle9100Count != 0)
                 {
-                    salesVolume[i] += Locations[i].SalesVolume * _generalData.RefillSalesFactor;
+                    salesVolume[i] += Locations[i].ScaledSalesVolume;
                 }
                 else
                 {
@@ -134,13 +134,13 @@ namespace Considition2023_Cs
                             total += neighbour.distanceScaleFactor;
                     }
 
-                    var currentSalesVolume = Locations[i].SalesVolume * _generalData.RefillSalesFactor;
+                    var currentScaledSalesVolume = Locations[i].ScaledSalesVolume;
 
                     //Add boosted sales to original sales volume
                     foreach (var neighbour in Neighbours[i])
                     {
                         if(solutionLocations[neighbour.index].Freestyle3100Count != 0 || solutionLocations[neighbour.index].Freestyle9100Count != 0)
-                            salesVolume[neighbour.index] += neighbour.distanceScaleFactor / total * _generalData.RefillDistributionRate * currentSalesVolume;
+                            salesVolume[neighbour.index] += neighbour.distanceScaleFactor / total * _generalData.RefillDistributionRate * currentScaledSalesVolume;
                     }
                 }
             }
@@ -160,7 +160,7 @@ namespace Considition2023_Cs
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
                 var sales = Math.Min(Round(salesVolume[i]), salesCapacity);
 //                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
-                kgCo2Savings += sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams) / 1000;
+                kgCo2Savings += sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams);
 
                 totalRevenue += sales * _generalData.RefillUnitData.ProfitPerUnit;
                 totalLeasingCost += solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek;
@@ -170,7 +170,8 @@ namespace Considition2023_Cs
 
                 totalFootfall += Locations[i].Footfall;
             }
-
+            kgCo2Savings /= 1000;
+            
             //Just some rounding for nice whole numbers
             totalRevenue = Round(totalRevenue);
             kgCo2Savings = Round(kgCo2Savings - totalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000 - totalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000);
