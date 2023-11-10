@@ -29,7 +29,7 @@ public class HenrikSolver1GöteborgTests
     }
     
     [TestMethod]
-    public void SolveGöteborgPlus300G()
+    public void SolveGöteborgPlus300()
     {
         var mapDataJson = File.ReadAllText("goteborg.cached.json");
         var mapData = JsonConvert.DeserializeObject<MapData>(mapDataJson)!;
@@ -49,7 +49,7 @@ public class HenrikSolver1GöteborgTests
                 LocationType = "Random",
                 SalesVolume = rnd.NextDouble() * 373,
                 footfallScale = rnd.Next(0, 10),
-                Footfall = rnd.NextDouble() * 2.2234818602607578,
+                Footfall = 990 * rnd.NextDouble(),
                 Longitude = longitud,
                 Latitude = latitude
             };
@@ -57,6 +57,8 @@ public class HenrikSolver1GöteborgTests
             mapData.locations.Add(loc.LocationName, loc);
         }
 
+        mapData.RandomizeLocationOrder(1335);
+        
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
@@ -67,6 +69,8 @@ public class HenrikSolver1GöteborgTests
         var score = scorer.CalculateScore(solution);
         
         Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        
+        // 518411259617
     }
     
     [TestMethod]

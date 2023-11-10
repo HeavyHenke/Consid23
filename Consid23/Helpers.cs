@@ -4,11 +4,11 @@ namespace Consid23;
 
 public static class Helpers
 {
-    public static void RandomizeLocationOrder(this MapData mapData)
+    public static void RandomizeLocationOrder(this MapData mapData, int seed = 1337)
     {
         var allLocations = new List<StoreLocation>(mapData.locations.Values);
         mapData.locations.Clear();
-        var rnd = new Random();
+        var rnd = new Random(seed);
         while (allLocations.Count > 0)
         {
             var randIx = rnd.Next(0, allLocations.Count);
