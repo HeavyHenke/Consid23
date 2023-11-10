@@ -133,7 +133,8 @@ namespace Considition2023_Cs
                     double total = 0;
                     foreach (var neighbour in Neighbours[i])
                     {
-                        total += neighbour.distanceScaleFactor;
+                        if(solutionLocations[neighbour.index].Freestyle3100Count != 0 || solutionLocations[neighbour.index].Freestyle9100Count != 0)
+                            total += neighbour.distanceScaleFactor;
                     }
 
                     var currentSalesVolume = Locations[i].SalesVolume * _generalData.RefillSalesFactor;
@@ -141,7 +142,8 @@ namespace Considition2023_Cs
                     //Add boosted sales to original sales volume
                     foreach (var neighbour in Neighbours[i])
                     {
-                        salesVolume[neighbour.index] += neighbour.distanceScaleFactor / total * _generalData.RefillDistributionRate * currentSalesVolume;
+                        if(solutionLocations[neighbour.index].Freestyle3100Count != 0 || solutionLocations[neighbour.index].Freestyle9100Count != 0)
+                            salesVolume[neighbour.index] += neighbour.distanceScaleFactor / total * _generalData.RefillDistributionRate * currentSalesVolume;
                     }
                 }
             }
@@ -160,7 +162,7 @@ namespace Considition2023_Cs
 
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
                 var sales = Math.Min(Round(salesVolume[i]), salesCapacity);
-
+//                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
                 kgCo2Savings += sales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams) / 1000;
 
                 totalRevenue += sales * _generalData.RefillUnitData.ProfitPerUnit;
