@@ -4,16 +4,12 @@ namespace Consid23;
 
 public class HenrikDennisSolver1
 {
-    private readonly GeneralData _generalData;
-    private readonly MapData _mapData;
     private readonly DennisModel _model;
     private readonly ISolutionSubmitter _solutionSubmitter;
 
     public HenrikDennisSolver1(GeneralData generalData, MapData mapData, ISolutionSubmitter solutionSubmitter)
     {
-        _mapData = mapData;
-        _generalData = generalData;
-        _model = new DennisModel(_generalData, _mapData);
+        _model = new DennisModel(generalData, mapData);
         _solutionSubmitter = solutionSubmitter;
     }
 
@@ -25,13 +21,19 @@ public class HenrikDennisSolver1
         var currScore = _model.CalculateScore(sol);
         while (true)
         {
-            var optimizations = new List<(DennisModel.SolutionLocation[] sol, double score)>(); 
-            optimizations.Add(RemoveOneFromAll(sol));
-            optimizations.Add(AddOneForAll(sol));
+            var optimizations = new List<(DennisModel.SolutionLocation[] sol, double score)>
+            {
+                RemoveOneFromAll(sol),
+                AddOneForAll(sol),
+                TryPlusOneAndMinusTwoOnNeighbours(sol)
+            };
 
             var best = optimizations.MaxBy(o => o.score);
             if (best.score <= currScore)
                 break;
+
+            var ix = optimizations.IndexOf(best);
+            Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore}");
 
             sol = best.sol;
             currScore = best.score;
@@ -47,7 +49,8 @@ public class HenrikDennisSolver1
         var currScore = _model.CalculateScore(sol);
         for (var i = 0; i < sol.Length; i++)
         {
-            RemoveOne(sol, i);
+            if (RemoveOne(sol, i) == false)
+                continue;
             var postScore = _model.CalculateScore(sol);
 
             if (postScore - currScore < 0)
@@ -65,7 +68,9 @@ public class HenrikDennisSolver1
         var currScore = _model.CalculateScore(sol);
         for (var i = 0; i < sol.Length; i++)
         {
-            AddOneAt(sol, i);
+            if(AddOneAt(sol, i) == false)
+                continue;
+            
             var postScore = _model.CalculateScore(sol);
 
             if (postScore - currScore < 0)
@@ -77,45 +82,92 @@ public class HenrikDennisSolver1
         return (sol, currScore);
     }
 
+    private (DennisModel.SolutionLocation[] sol, double score) TryPlusOneAndMinusTwoOnNeighbours(DennisModel.SolutionLocation[] original)
+    {
+        var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var currScore = _model.CalculateScore(sol);
+        
+        for (int i = 0; i < _model.Locations.Length; i++)
+        {
+            if (sol[i].Freestyle9100Count == 5 && sol[i].Freestyle3100Count == 5)
+                continue;
 
-    private static void AddOneAt(DennisModel.SolutionLocation[] sol, int index)
+            var neighbours = _model.Neighbours[i];
+            if (neighbours.Count == 0)
+                continue;
+
+            var clone = (DennisModel.SolutionLocation[])sol.Clone();
+            if (AddOneAt(clone, i) == false)
+                continue;
+
+            var bestClone = clone;
+            var bestScore = currScore;
+
+            for (int a = 0; a < neighbours.Count; a++)
+            {
+                var aIndex = neighbours[a].index;
+                if (RemoveOne(clone, aIndex) == false)
+                    continue;
+
+                for (int b = a; b < neighbours.Count; b++)
+                {
+                    var bIndex = neighbours[b].index;
+                    if (RemoveOne(clone, bIndex) == false)
+                        continue;
+
+                    var score = _model.CalculateScore(clone);
+                    if (score > bestScore)
+                    {
+                        bestClone = (DennisModel.SolutionLocation[])clone.Clone();
+                        bestScore = score;
+                    }
+
+                    AddOneAt(clone, bIndex);    // Reset to old sate
+                }
+
+                AddOneAt(clone, aIndex);    // Reset to old sate
+            }
+
+            sol = bestClone;
+            currScore = bestScore;
+        }
+
+        return (sol, currScore);
+    }
+
+    private static bool AddOneAt(DennisModel.SolutionLocation[] sol, int index)
     {
         var loc = sol[index];
-        if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })
+        if (loc.Freestyle3100Count == 0)
         {
             sol[index].Freestyle3100Count = 1;
+            return true;
         }
-        else if (loc.Freestyle3100Count == 0)
-        {
-            sol[index].Freestyle3100Count++;
-        }
-        else if (loc.Freestyle9100Count < 5)
+        if (loc.Freestyle9100Count < 5)
         {
             sol[index].Freestyle3100Count--;
             sol[index].Freestyle9100Count++;
+            return true;
         }
-        else if (loc.Freestyle9100Count < 5)
-        {
-            sol[index].Freestyle3100Count++;
-        }
+        return false;
     }
 
-    private static void RemoveOne(DennisModel.SolutionLocation[] sol, int index)
+    private static bool RemoveOne(DennisModel.SolutionLocation[] sol, int index)
     {
         var loc = sol[index];
         if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })
         {
-            return;
+            return false;
         }
 
         if (loc.Freestyle3100Count > 0)
         {
             sol[index].Freestyle3100Count--;
+            return true;
         }
-        else if (loc.Freestyle9100Count > 0)
-        {
-            sol[index].Freestyle9100Count--;
-            sol[index].Freestyle3100Count++;
-        }
+
+        sol[index].Freestyle9100Count--;
+        sol[index].Freestyle3100Count++;
+        return true;
     }
 }

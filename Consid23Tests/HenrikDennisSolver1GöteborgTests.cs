@@ -86,6 +86,10 @@ public class HenrikDennisSolver1GöteborgTests
 
         // Best max found:
         // 518227200764
+        
+        // Now:
+        // 518029561620
+        // 
         */
 
         var scorer = new Scoring(generalData, mapData);
@@ -94,21 +98,21 @@ public class HenrikDennisSolver1GöteborgTests
         var score = scorer.CalculateScore(sol);
 
         Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
-
     }
 
     [TestMethod]
-    public void SolveGöteborgPlus2600()
+    public void SolveGöteborgTransformedToLondon()
     {
         var mapDataJson = File.ReadAllText("goteborg.cached.json");
         var mapData = JsonConvert.DeserializeObject<MapData>(mapDataJson)!;
 
-        // Make it bigger
-        mapData.Border.LatitudeMax += 2*(mapData.Border.LatitudeMax - mapData.Border.LatitudeMin);
-        mapData.Border.LongitudeMax += 2*(mapData.Border.LongitudeMax - mapData.Border.LongitudeMin);
+        // Make it bigger to mimic London
+        mapData.Border.LatitudeMax += 2.5*(mapData.Border.LatitudeMax - mapData.Border.LatitudeMin);
+        mapData.Border.LongitudeMax += 2.5*(mapData.Border.LongitudeMax - mapData.Border.LongitudeMin);
 
         var rnd = new Random(1337);
-        for (int i = 0; i < 2600; i++)
+        var göteborgSize = mapData.locations.Count;
+        for (int i = 0; i < 14 * göteborgSize; i++)
         {
             var longitud = mapData.Border.LongitudeMin + rnd.NextDouble() * (mapData.Border.LongitudeMax - mapData.Border.LongitudeMin);
             var latitude = mapData.Border.LatitudeMin + rnd.NextDouble() * (mapData.Border.LatitudeMax - mapData.Border.LatitudeMin);

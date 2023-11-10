@@ -62,10 +62,8 @@ public class HenrikSolver1GöteborgTests
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
-        var startPoint = new HenrikSolver1(generalData, mapData, new DummySubmitter()).CreateStartPointByAddOneAt();
-        
-        var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
-        var solution = solver.OptimizeSolution(startPoint);
+        var henrikSolver1 = new HenrikSolver1(generalData, mapData, new DummySubmitter());
+        var solution = henrikSolver1.CalcSolution();
 
         var scorer = new Scoring(generalData, mapData);
         var score = scorer.CalculateScore(solution);
