@@ -117,9 +117,6 @@ namespace Considition2023_Cs
                 Array.Clear(salesVolume);
             
             for (var i = 0; i < _numLocations; i++)
-                salesVolume[i] = 0;
-
-            for (var i = 0; i < _numLocations; i++)
             {
                 if (solutionLocations[i].Freestyle3100Count != 0 || solutionLocations[i].Freestyle9100Count != 0)
                 {
