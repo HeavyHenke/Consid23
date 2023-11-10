@@ -34,8 +34,8 @@ public class HenrikDennisSolver1
             if (best.score <= currScore)
                 break;
 
-            var ix = optimizations.IndexOf(best);
-            Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore} total score {best.score}");
+            // var ix = optimizations.IndexOf(best);
+            // Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore} total score {best.score}");
 
             
             sol = best.sol;

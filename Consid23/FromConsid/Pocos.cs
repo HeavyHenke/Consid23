@@ -35,6 +35,11 @@ namespace Considition2023_Cs
         public required Dictionary<string, int> LocationTypeCount { get; set; }
         public required DateTime AvailableFrom { get; set; }
         public required DateTime AvailableTo { get; set; }
+
+        public MapData Clone()
+        {
+            return JsonConvert.DeserializeObject<MapData>(JsonConvert.SerializeObject(this))!;
+        }
     }
 
     public class StoreLocation

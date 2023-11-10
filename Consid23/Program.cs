@@ -44,16 +44,27 @@ MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
+Parallel.For(1, 1000, DoWorkInOneThread);
+
 // await new HenrikSolverOnePoint(generalData, mapData).Submit100Games(api, apikey);
 
 // mapData.RandomizeLocationOrder();
 
 
-var startPoint = new HenrikSolver1(generalData, mapData, submitter).CreateStartPointByAddOneAt();
-var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
+// var startPoint = new HenrikSolver1(generalData, mapData, submitter).CreateStartPointByAddOneAt();
+// var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
 
-submitter.AddSolutionToSubmit(solution);
 submitter.Dispose();
+
+
+void DoWorkInOneThread(int ix)
+{
+    var localMapData = mapData.Clone();
+    localMapData.RandomizeLocationOrder(ix);
+    var startPoint = new HenrikSolver1(generalData, mapData, submitter).CreateStartPointByAddOneAt();
+    var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
+    submitter.AddSolutionToSubmit(solution);
+}
 
 // GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
 // Console.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
