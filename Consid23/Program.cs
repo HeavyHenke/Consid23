@@ -63,9 +63,7 @@ void DoWorkInOneThread(int ix)
     var model = new DennisModel(generalData, localMapData);
     
     var startPoint = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
-    var solution = new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint);
-    
-    submitter.AddSolutionToSubmit(solution);
+    new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint);
 }
 
 // GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
