@@ -64,23 +64,24 @@ public class HenrikDennisSolver1GöteborgTests
 
         var dennisModel = new DennisModel(generalData, mapData);
         var startPoint = new HenrikDennisStaticInitialStateCreator(dennisModel, generalData).CreateInitialSolution();
-        // var startScore = new ScoringHenrik(generalData, mapData).CalculateScore(startPoint);
-        // Console.WriteLine($"Start point: {startScore.GameScore.Total}");
+
+        
         // 518429541440
 
         
         // double bestScore = 0;
-        // for (int i = 0; i < 300; i++)
+        // for (int i = 0; i < 200; i++)
         // {
-        //     mapData.RandomizeLocationOrder(i+700);
+        //     mapData.RandomizeLocationOrder(i+17777);
+        //     dennisModel = new DennisModel(generalData, mapData);
         //     
-        //     var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
+        //     var solver = new HenrikDennisSolver1(dennisModel, new DummySubmitter());
         //     var solution = solver.OptimizeSolution(startPoint);
         //
         //     var scorer = new Scoring(generalData, mapData);
         //     var score = scorer.CalculateScore(solution);
         //
-        //     Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+        //     // Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
         //
         //     if (score.GameScore.Total > bestScore)
         //         bestScore = score.GameScore.Total;
@@ -89,14 +90,17 @@ public class HenrikDennisSolver1GöteborgTests
         // Console.WriteLine("Best score: " + bestScore);
 
         // Best max found:
-        // 518437231967
+        // 518437265412
+
         
         // Now:
         // 518437265412
+        // Utan super-expensive loop:
+        // 518429541440
         
         var solver = new HenrikDennisSolver1(dennisModel, new DummySubmitter());
         var sol = solver.OptimizeSolution(startPoint);
-
+        
         var scorer = new Scoring(generalData, mapData);
         var score = scorer.CalculateScore(sol);
         

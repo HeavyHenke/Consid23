@@ -112,11 +112,11 @@ public class HenrikDennisSolver1
                 TryPlusOneAndMinusOneOnNeighbour(sol),
                 TryPlusOneAndMinusTwoOnNeighbours(sol),
                 TryPlusOneAndMinusThreeOnNeighbours(sol),
-                // TryOptimizeNeighbourhoods(sol),
+                TryOptimizeNeighbourhoods(sol, 5),
             };
 
             var best = optimizations.MaxBy(o => o.score);
-            if (best.score <= currScore)
+            if (best.score <= currScore) 
                 break;
 
             var ix = optimizations.IndexOf(best);
@@ -132,8 +132,11 @@ public class HenrikDennisSolver1
         return _model.ConvertToSubmitSolution(sol);
     }
 
-    private (DennisModel.SolutionLocation[] sol, double score) TryOptimizeNeighbourhoods(DennisModel.SolutionLocation[] original)
+    private (DennisModel.SolutionLocation[] sol, double score) TryOptimizeNeighbourhoods(DennisModel.SolutionLocation[] original, int maxNeighborhoodSize)
     {
+        if (maxNeighborhoodSize < 2)
+            return (original, -1);
+
         var bestSolution = (DennisModel.SolutionLocation[])original.Clone();
         var bestScore = _model.CalculateScore(bestSolution);
         var workingCopy = (DennisModel.SolutionLocation[])bestSolution.Clone();
@@ -156,6 +159,9 @@ public class HenrikDennisSolver1
             }
         }
 
+        if (maxNeighborhoodSize == 2)
+            return (bestSolution, bestScore);
+
         foreach (var neighbourhood in _neighbourhoodWithThree)
         {
             foreach (var a in SolutionLocationsInOrder)
@@ -175,6 +181,10 @@ public class HenrikDennisSolver1
                 }
             }
         }
+        
+        if (maxNeighborhoodSize == 3)
+            return (bestSolution, bestScore);
+
         
         foreach (var neighbourhood in _neighbourhoodWithFour)
         {
@@ -209,6 +219,10 @@ public class HenrikDennisSolver1
             }
         }
 
+        if (maxNeighborhoodSize == 4)
+            return (bestSolution, bestScore);
+
+        
         foreach (var neighbourhood in _neighbourhoodWithFive)
         {
             var numSmallGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
@@ -243,6 +257,10 @@ public class HenrikDennisSolver1
                 }
             }
         }
+        
+        if (maxNeighborhoodSize == 5)
+            return (bestSolution, bestScore);
+
 
         foreach (var neighbourhood in _neighbourhoodWithSix)
         {
