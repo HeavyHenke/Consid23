@@ -62,7 +62,11 @@ public class HenrikDennisSolver1GöteborgTests
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
-        var startPoint = new HenrikSolver1(generalData, mapData, new DummySubmitter()).CreateStartPointByAddOneAt();
+        var dennisModel = new DennisModel(generalData, mapData);
+        var startPoint = new HenrikDennisStaticInitialStateCreator(dennisModel, generalData).CreateInitialSolution();
+        // var startScore = new ScoringHenrik(generalData, mapData).CalculateScore(startPoint);
+        // Console.WriteLine($"Start point: {startScore.GameScore.Total}");
+        // 518429541440
 
         
         // double bestScore = 0;
@@ -90,9 +94,10 @@ public class HenrikDennisSolver1GöteborgTests
         // Now:
         // 518437265412
         
-        var scorer = new Scoring(generalData, mapData);
-        var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
+        var solver = new HenrikDennisSolver1(dennisModel, new DummySubmitter());
         var sol = solver.OptimizeSolution(startPoint);
+
+        var scorer = new Scoring(generalData, mapData);
         var score = scorer.CalculateScore(sol);
         
         Trace.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");

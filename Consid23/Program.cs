@@ -1,4 +1,5 @@
-﻿using Consid23;
+﻿using System.Diagnostics;
+using Consid23;
 using Considition2023_Cs;
 
 const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
@@ -44,18 +45,14 @@ MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
-Parallel.For(1, 10, DoWorkInOneThread);
+var sw = Stopwatch.StartNew();
 
-// await new HenrikSolverOnePoint(generalData, mapData).Submit100Games(api, apikey);
+Parallel.For(1, 2, DoWorkInOneThread);
 
-// mapData.RandomizeLocationOrder();
-
-
-// var startPoint = new HenrikSolver1(generalData, mapData, submitter).CreateStartPointByAddOneAt();
-// var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
+sw.Stop();
 
 submitter.Dispose();
-Console.WriteLine("Done!");
+Console.WriteLine($"Done, it took {sw.Elapsed}");
 return;
 
 
@@ -63,8 +60,11 @@ void DoWorkInOneThread(int ix)
 {
     var localMapData = mapData.Clone();
     localMapData.RandomizeLocationOrder(ix);
-    var startPoint = new HenrikSolver1(generalData, mapData, submitter).CreateStartPointByAddOneAt();
-    var solution = new HenrikDennisSolver1(generalData, mapData, submitter).OptimizeSolution(startPoint);
+    var model = new DennisModel(generalData, localMapData);
+    
+    var startPoint = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
+    var solution = new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint);
+    
     submitter.AddSolutionToSubmit(solution);
 }
 

@@ -12,10 +12,10 @@ public class HenrikDennisSolver1
     private readonly List<int[]> _neighbourhoodWithFive;
     private readonly List<int[]> _neighbourhoodWithSix;
 
-    public HenrikDennisSolver1(GeneralData generalData, MapData mapData, ISolutionSubmitter solutionSubmitter)
+    public HenrikDennisSolver1(DennisModel model, ISolutionSubmitter submitter)
     {
-        _model = new DennisModel(generalData, mapData);
-        _solutionSubmitter = solutionSubmitter;
+        _model = model;
+        _solutionSubmitter = submitter;
 
         _neighbourhoodWithTwo = new();
         for (var index = 0; index < _model.Neighbours.Length; index++)
@@ -67,11 +67,17 @@ public class HenrikDennisSolver1
             }
         }
     }
+    
+    public HenrikDennisSolver1(GeneralData generalData, MapData mapData, ISolutionSubmitter solutionSubmitter)
+        : this(new DennisModel(generalData, mapData), solutionSubmitter)
+    {
+    }
 
     public SubmitSolution OptimizeSolution(SubmitSolution submitSolution)
     {
         var sol = _model.ConvertFromSubmitSolution(submitSolution);
-
+        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
+        
         // Do cheap iterations first
         var currScore = _model.CalculateScore(sol);
         while (true)
@@ -89,7 +95,6 @@ public class HenrikDennisSolver1
 
             var ix = optimizations.IndexOf(best);
             Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore} total score {best.score}");
-
             
             sol = best.sol;
             currScore = best.score;
