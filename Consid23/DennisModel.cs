@@ -24,8 +24,8 @@ namespace Considition2023_Cs
         [DebuggerDisplay("{Freestyle9100Count} + {Freestyle3100Count}")]
         public struct SolutionLocation
         {
-            public int Freestyle9100Count;
-            public int Freestyle3100Count;
+            public byte Freestyle9100Count;
+            public byte Freestyle3100Count;
         }
 
         public SolutionLocation[] CreateSolutionLocations()
@@ -42,8 +42,8 @@ namespace Considition2023_Cs
             foreach (var location in submitSolution.Locations)
             {
                 var i = LocationNameToIndex[location.Key];
-                solutionLocations[i].Freestyle3100Count = location.Value.Freestyle3100Count;
-                solutionLocations[i].Freestyle9100Count = location.Value.Freestyle9100Count;
+                solutionLocations[i].Freestyle3100Count = (byte)location.Value.Freestyle3100Count;
+                solutionLocations[i].Freestyle9100Count = (byte)location.Value.Freestyle9100Count;
             }
 
             return solutionLocations;
@@ -180,9 +180,9 @@ namespace Considition2023_Cs
             return Round((kgCo2Savings * _generalData.Co2PricePerKiloInSek + earnings) * (1 + totalFootfall));
         }
 
-        long Round(double d)
+        private static long Round(double d)
         {
-            return (long)(d+.5);
+            return (long)(d + .5);
         }
     }
 }
