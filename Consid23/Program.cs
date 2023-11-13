@@ -62,8 +62,10 @@ void DoWorkInOneThread(int ix)
     localMapData.RandomizeLocationOrder(ix);
     var model = new DennisModel(generalData, localMapData);
     
-    var startPoint = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
-    new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint);
+    var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
+    // var score1 = model.CalculateScore(model.ConvertFromSubmitSolution(startPoint1));
+    
+    new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint1);
 }
 
 // GameData score = new Scoring(generalData, mapData).CalculateScore(solution);

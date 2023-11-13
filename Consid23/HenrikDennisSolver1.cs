@@ -112,7 +112,7 @@ public class HenrikDennisSolver1
                 TryPlusOneAndMinusOneOnNeighbour(sol),
                 TryPlusOneAndMinusTwoOnNeighbours(sol),
                 TryPlusOneAndMinusThreeOnNeighbours(sol),
-                TryOptimizeNeighbourhoods(sol, 5),
+                // TryOptimizeNeighbourhoods(sol, 5),
             };
 
             var best = optimizations.MaxBy(o => o.score);
