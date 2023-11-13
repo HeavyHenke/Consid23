@@ -23,9 +23,9 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
         var score = _scorer.CalculateScore(sol);
 
         lock(this)
-        if (score.GameScore.Total > _maxSubmitted)
+        if (score.GameScore!.Total > _maxSubmitted)
         {
-            Console.WriteLine($"Not submitting (ConsoleOnlySubmitter) GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
+            //Console.WriteLine($"Not submitting (ConsoleOnlySubmitter) GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
 
             _maxSubmitted = score.GameScore.Total;
             var time = DateTime.Now.ToString("dd_hh_mm_ss");

@@ -65,7 +65,10 @@ void DoWorkInOneThread(int ix)
     var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
     // var score1 = model.CalculateScore(model.ConvertFromSubmitSolution(startPoint1));
     
-    new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint1);
+    var lastSol = new HenrikDennisOptimizer2Gradient(model, submitter).OptimizeSolution(startPoint1);
+    var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
+    Console.WriteLine($"Best score found: {score2}");
+
 }
 
 // GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
