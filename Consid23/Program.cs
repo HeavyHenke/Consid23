@@ -46,13 +46,15 @@ GeneralData generalData = await api.GetGeneralDataAsync();
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
 var sw = Stopwatch.StartNew();
+object lck = new object();
+double best = 0;
 
 Parallel.For(1, 2, DoWorkInOneThread);
 
 sw.Stop();
 
 submitter.Dispose();
-Console.WriteLine($"Done, it took {sw.Elapsed}");
+Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 return;
 
 
@@ -67,8 +69,11 @@ void DoWorkInOneThread(int ix)
     
     var lastSol = new HenrikDennisOptimizer2Gradient(model, submitter).OptimizeSolution(startPoint1);
     var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
+    
+    lock(lck)
+        best = Math.Max(best, score2);
+    
     Console.WriteLine($"Best score found: {score2}");
-
 }
 
 // GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
