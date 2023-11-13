@@ -45,23 +45,44 @@ MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
+// int locIx = 1;
+// foreach (var hp in mapData.Hotspots.Take(5))
+// {
+//     var locName = "location"+ locIx++;
+//     mapData.locations.Add(locName,
+//         new StoreLocation
+//         {
+//             LocationName = locName,
+//             LocationType = "Grocery-store-large",
+//             Footfall = hp.Footfall,
+//             SalesVolume = generalData.LocationTypes["groceryStoreLarge"].SalesVolume,
+//             Longitude = hp.Longitude,
+//             Latitude = hp.Latitude,
+//             footfallScale = 1
+//         });
+// }
+
 var sw = Stopwatch.StartNew();
 object lck = new object();
-double best = 0;
+double best = -100000;
 SubmitSolution? bestSol = null;
 
-Parallel.For(1, 10, DoWorkInOneThread);
+Parallel.For(1, 2, DoWorkInOneThread);
 
 sw.Stop();
 
 submitter.Dispose();
 Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
+// mapData.locations.Clear();
+var localScore = new Scoring(generalData, mapData).CalculateScore(bestSol);
+
+
 // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
 // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
 // var localScore = new Scoring(generalData, mapData).CalculateScore(bestSol!);
-// Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
-
+Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
+// api.Sumbit(mapName, bestSol, apikey);
 
 return;
 

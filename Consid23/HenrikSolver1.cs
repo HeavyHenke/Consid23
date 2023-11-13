@@ -21,7 +21,7 @@ public class HenrikSolver1
     {
         var sol = CreateStartPointByAddOneAt();
         _solutionSubmitter.AddSolutionToSubmit(sol);
-        _solutionSubmitter.AddSolutionToSubmit(CreateStartPointBySalesVolume());
+        //_solutionSubmitter.AddSolutionToSubmit(CreateStartPointBySalesVolume());
         
         // Does not help :(
         //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
@@ -262,26 +262,29 @@ public class HenrikSolver1
     }
 
 
-    private static void AddOneAt(SubmitSolution sol, string location)
+    private void AddOneAt(SubmitSolution sol, string location)
     {
         if (sol.Locations.TryGetValue(location, out var loc) == false)
         {
             sol.Locations.Add(location, new PlacedLocations
             {
                 Freestyle3100Count = 1,
-                Freestyle9100Count = 0
+                Freestyle9100Count = 0,
+                // Longitude = _mapData.locations[location].Longitude,
+                // Latitude = _mapData.locations[location].Latitude,
+                // LocationType = _mapData.locations[location].LocationType
             });
         }
         else if (loc.Freestyle3100Count == 0)
         {
             loc.Freestyle3100Count++;
         }
-        else if(loc.Freestyle9100Count < 5)
+        else if(loc.Freestyle9100Count < 2)
         {
             loc.Freestyle3100Count--;
             loc.Freestyle9100Count++;
         }
-        else if (loc.Freestyle9100Count < 5)
+        else if (loc.Freestyle9100Count < 2)
         {
             loc.Freestyle3100Count++;
         }

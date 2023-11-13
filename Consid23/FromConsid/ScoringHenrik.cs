@@ -412,7 +412,7 @@ public class ScoringHenrik : IScoring
             return null;
         }
 
-        public static int DistanceBetweenPoint(double latitude1, double longitude1, double latitude2, double longitude2)
+        private static int DistanceBetweenPoint(double latitude1, double longitude1, double latitude2, double longitude2)
         {
             double r = 6371e3;
             double latRadian1 = latitude1 * Math.PI / 180;
@@ -427,8 +427,7 @@ public class ScoringHenrik : IScoring
 
             double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
-            int distance = (int)Math.Round(r * c, 0);
-
+            int distance = (int)(r * c + .5);
             return distance;
         }
 }
