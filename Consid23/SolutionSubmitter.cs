@@ -58,17 +58,20 @@ public class SolutionSubmitter : ISolutionSubmitter
                 var bestScoreItem = submitList.OrderByDescending(s => scoring.CalculateScore(s).GameScore!.Total).First();
                 try
                 {
-                    var score = _api.Sumbit(_mapData.MapName, bestScoreItem, _apiKey);
+                    var score = scoring.CalculateScore(bestScoreItem);
                     if (score.GameScore!.Total > _maxSubmitted)
                     {
+                        //_api.Sumbit(_mapData.MapName, bestScoreItem, _apiKey);
+
                         _maxSubmitted = score.GameScore.Total;
                         var time = DateTime.Now.ToString("dd_hh_mm_ss");
                         var filename = $"{_mapData.MapName}_{score.GameScore.Total}_{time}.json";
                         File.WriteAllText(filename, JsonConvert.SerializeObject(bestScoreItem));
+
+                        Console.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}. Skipped {submitList.Count - 1} items int submit list.");
                     }
                     
                     bestScoreItem = null;
-                    Console.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}. Skipped {submitList.Count - 1} items int submit list.");
                 }
                 catch (Exception e)
                 {
@@ -78,7 +81,7 @@ public class SolutionSubmitter : ISolutionSubmitter
                 }
             }
 
-            if (_exit)
+            if (_exit && _submitQueue.IsEmpty)
                 return;
             
             Thread.Sleep(2000);

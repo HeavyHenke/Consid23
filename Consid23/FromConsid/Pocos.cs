@@ -16,11 +16,14 @@ namespace Considition2023_Cs
 
     public class PlacedLocations
     {
-        [Range(0, 5)]
+        [Range(0, 2)]
         public required int Freestyle9100Count { get; set; } = -1;
 
-        [Range(0, 5)]
+        [Range(0, 2)]
         public required int Freestyle3100Count { get; set; } = -1;
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string LocationType { get; set; } = string.Empty;
     }
 
 
@@ -107,7 +110,6 @@ namespace Considition2023_Cs
         [Range(0, double.MaxValue)]
         public required double ProfitPerUnit { get; set; } = -1;
     }
-
     public class RefillMachineData
     {
         public string Type { get; set; } = string.Empty;
@@ -149,6 +151,7 @@ namespace Considition2023_Cs
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public double Footfall { get; set; }
+        public int FootfallScale { get; set; }
         public double SalesVolume { get; set; }
         public double SalesCapacity { get; set; }
         public double LeasingCost { get; set; }

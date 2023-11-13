@@ -14,6 +14,10 @@ public static class MapNames
     public static string Malmo { get; } = "malmo";
     public static string London { get; } = "london";
     public static string Berlin { get; } = "berlin";
+    
+    // Sandbox
+    public static string GSandbox { get; } = "g-sandbox";
+    public static string SSandbox { get; } = "s-sandbox";
 }
 
 public static class LocationKeys

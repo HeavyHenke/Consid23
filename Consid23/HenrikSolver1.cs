@@ -41,15 +41,17 @@ public class HenrikSolver1
         }
 
         // Does not help :(
-        // while (true)
-        // {
-        //     var preScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-        //     TryPlusOneAndMinusTwoOnNeighbours(scorer, ref sol);
-        //     TryMinusOneAndPlusTwoOnNeighbours(scorer, sol);
-        //     var postScore = scorer.CalculateScore(_mapData.MapName, sol, _mapData, _generalData);
-        //     if (ScoreDiff(postScore, preScore) <= 0)
-        //         break;
-        // }
+        while (true)
+        {
+            var preScore = _scorer.CalculateScore(sol);
+            TryPlusOneAndMinusTwoOnNeighbours(ref sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol);
+            TryMinusOneAndPlusTwoOnNeighbours(ref sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol);
+            var postScore = _scorer.CalculateScore(sol);
+            if (ScoreDiff(postScore, preScore) <= 0)
+                break;
+        }
         
         return sol;
     }
@@ -134,7 +136,7 @@ public class HenrikSolver1
             var max = solutions.MaxBy(q => q.scoreDiff);
             if (max.scoreDiff > 0)
             {
-                Console.WriteLine("Successful move with diff2: " + max.scoreDiff);
+                // Console.WriteLine("Successful move with diff2: " + max.scoreDiff);
                 sol = max.sol;
                 bestSore = max.score;
             }
@@ -169,7 +171,7 @@ public class HenrikSolver1
             var max = solutions.Where(q => q.scoreDiff != 0).OrderByDescending(q => q.scoreDiff).FirstOrDefault();
             if (max != default && max.scoreDiff > 0)
             {
-                Console.WriteLine("Successful move with diff3: " + max.scoreDiff);
+                // Console.WriteLine("Successful move with diff3: " + max.scoreDiff);
                 sol = max.sol;
             }
         }
@@ -201,7 +203,7 @@ public class HenrikSolver1
             var max = solutions.MaxBy(q => q.scoreDiff);
             if (max.scoreDiff > 0)
             {
-                Console.WriteLine("Successful move with diff: " + max.scoreDiff);
+                // Console.WriteLine("Successful move with diff: " + max.scoreDiff);
                 sol = max.sol;
                 bestSore = max.score;
             }

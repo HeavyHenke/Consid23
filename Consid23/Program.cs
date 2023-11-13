@@ -37,7 +37,7 @@ const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 //     return;
 // }
 
-var mapName = MapNames.Goteborg;
+var mapName = MapNames.Uppsala;
 
 HttpClient client = new();
 Api api = new(client);
@@ -48,13 +48,21 @@ ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData
 var sw = Stopwatch.StartNew();
 object lck = new object();
 double best = 0;
+SubmitSolution? bestSol = null;
 
-Parallel.For(1, 2, DoWorkInOneThread);
+Parallel.For(1, 10, DoWorkInOneThread);
 
 sw.Stop();
 
 submitter.Dispose();
 Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
+
+// var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
+// Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
+// var localScore = new Scoring(generalData, mapData).CalculateScore(bestSol!);
+// Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
+
+
 return;
 
 
@@ -62,16 +70,27 @@ void DoWorkInOneThread(int ix)
 {
     var localMapData = mapData.Clone();
     localMapData.RandomizeLocationOrder(ix);
-    var model = new DennisModel(generalData, localMapData);
+    //var model = new DennisModel(generalData, localMapData);
     
-    var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
+    //var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
     // var score1 = model.CalculateScore(model.ConvertFromSubmitSolution(startPoint1));
     
-    var lastSol = new HenrikDennisOptimizer2Gradient(model, submitter).OptimizeSolution(startPoint1);
-    var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
-    
-    lock(lck)
-        best = Math.Max(best, score2);
+    //var lastSol = new HenrikDennisOptimizer2Gradient(model, submitter).OptimizeSolution(startPoint1);
+    //var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
+
+    var solver = new HenrikSolver1(generalData, localMapData, submitter);
+    var solution = solver.CalcSolution();
+    var score = new ScoringHenrik(generalData, mapData).CalculateScore(solution);
+    var score2 = score.GameScore!.Total;
+
+    lock (lck)
+    {
+        if (score2 > best)
+        {
+            best = score2;
+            bestSol = solution;
+        }
+    }
     
     Console.WriteLine($"Best score found: {score2}");
 }
