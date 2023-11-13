@@ -301,19 +301,24 @@ public class ScoringHenrik : IScoring
             foreach (KeyValuePair<string, StoreLocationScoring> kvpScope in locations)
             {
                 int count = 1;
-                foreach (KeyValuePair<string, StoreLocationScoring> kvpSurrounding in locations)
+                foreach (var n in _neighbours[kvpScope.Key])
                 {
-                    if (kvpScope.Key != kvpSurrounding.Key)
-                    {
-                        int distance = DistanceBetweenPoint(
-                            kvpScope.Value.Latitude, kvpScope.Value.Longitude, kvpSurrounding.Value.Latitude, kvpSurrounding.Value.Longitude
-                        );
-                        if (distance < generalData.WillingnessToTravelInMeters)
-                        {
-                            count++;
-                        }
-                    }
+                    if(locations.ContainsKey(n.neighbour))
+                        count++;
                 }
+                // foreach (KeyValuePair<string, StoreLocationScoring> kvpSurrounding in locations)
+                // {
+                //     if (kvpScope.Key != kvpSurrounding.Key)
+                //     {
+                //         int distance = DistanceBetweenPoint(
+                //             kvpScope.Value.Latitude, kvpScope.Value.Longitude, kvpSurrounding.Value.Latitude, kvpSurrounding.Value.Longitude
+                //         );
+                //         if (distance < generalData.WillingnessToTravelInMeters)
+                //         {
+                //             count++;
+                //         }
+                //     }
+                // }
 
                 kvpScope.Value.Footfall = kvpScope.Value.Footfall / count;
 
