@@ -8,16 +8,19 @@ public class SandboxClusterHotspotsToLocations
 
     class Cluster
     {
-        private readonly List<Hotspot> _hotspots;
+        public readonly List<Hotspot> _hotspots;
         public double CenterLat;
         public double CenterLong;
         public int Size => _hotspots.Count;
+        public string Name { get; }
+        public double Importance { get; set; }
 
-        public Cluster(Hotspot hotspot)
+        public Cluster(Hotspot hotspot, string name)
         {
             _hotspots = new List<Hotspot> { hotspot };
             CenterLat = hotspot.Latitude;
             CenterLong = hotspot.Longitude;
+            Name = name;
         }
 
         public bool TryAddToCluster(Hotspot h)
@@ -48,8 +51,9 @@ public class SandboxClusterHotspotsToLocations
     {
         var output = input.Clone();
 
-        var clusters = new List<Cluster> { new Cluster(input.Hotspots[0]) };
+        var clusters = new List<Cluster> { new Cluster(input.Hotspots[0], "location1") };
 
+        int locationNum = 2;
         for (int i = 1; i < input.Hotspots.Count; i++)
         {
             bool foundCluster = false;
@@ -61,12 +65,27 @@ public class SandboxClusterHotspotsToLocations
                     break;
                 }
             }
-            
-            if(!foundCluster)
-                clusters.Add(new Cluster(input.Hotspots[i]));
+
+            if (!foundCluster)
+                clusters.Add(new Cluster(input.Hotspots[i], "location" + locationNum++));
         }
 
-        clusters = clusters.OrderByDescending(c => c.Size).ToList();
+        var scoringLoc = clusters.Select((s, i) => new StoreLocationScoring
+        {
+            Longitude = s.CenterLong,
+            Latitude = s.CenterLat,
+            LocationName = s.Name
+        }).ToDictionary(key => key.LocationName, val => val);
+
+        new ScoringHenrik(_generalData, output).CalcualteFootfall(scoringLoc);
+        foreach (var cluster in clusters)
+        {
+            cluster.Importance = scoringLoc[cluster.Name].Footfall;
+        }
+        // clusters = clusters.OrderBy(c => c.Importance).ToList();
+        // OrderBy           => 3215,45
+        // OrderByDescending => 3184,45
+        // Oordnat => 3257,18
         
         const int maxGroceryStoreLarge = 5;
         const int maxGroceryStore = 20;
@@ -75,27 +94,31 @@ public class SandboxClusterHotspotsToLocations
         const int maxKiosk = 3;
 
         var toPlace = new List<LocationType>();
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], maxGroceryStore));
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["convenience"], maxConvenience));
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["gasStation"], maxGasStation));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["gasStation"], maxGasStation));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["convenience"], maxConvenience));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], maxGroceryStore));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
 
-        int locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
         {
             string locationName = "location" + locationNum++;
+            var lat = clusters[i].CenterLat;
+            var lon = clusters[i].CenterLong;
+            
             output.locations.Add(locationName,
                 new StoreLocation
                 {
                     LocationName = locationName,
                     LocationType = toPlace[i].Type,
-                    Latitude = clusters[i].CenterLat,
-                    Longitude = clusters[i].CenterLong,
+                    Latitude = lat,// clusters[i].CenterLat,
+                    Longitude = lon,// clusters[i].CenterLong,
                     SalesVolume = toPlace[i].SalesVolume
                 });
         }
-        
+        // 3299,53 om vi väljer ena hotspoten endast
+        // 3327,95 om vi sätter något i centrum
+       
         
         return output;
     }
