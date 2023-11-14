@@ -43,6 +43,11 @@ public class DennisModelTests
         var solver = new HenrikSolver1(generalData, mapData, new DummySubmitter());
         var solution = solver.CalcSolution();
 
+        var scorer1 = new Scoring(generalData, mapData);
+        var score1= scorer1.CalculateScore(solution);
+        
+        
+        
         var scorer = new DennisModel(generalData, mapData);
         var solutionLocations = scorer.ConvertFromSubmitSolution(solution);
         double totalScore = 0;
@@ -50,6 +55,6 @@ public class DennisModelTests
         for (int i = 0; i < 1000; i++)
             totalScore = scorer.CalculateScore(solutionLocations);
 
-        Assert.AreEqual(totalScore, 56_826_754);
+        Assert.AreEqual(score1.GameScore.Total, totalScore);
     }
 }

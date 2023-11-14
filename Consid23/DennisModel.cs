@@ -161,23 +161,44 @@ namespace Considition2023_Cs
 
                 totalFreestyle3100Count += solutionLocations[i].Freestyle3100Count;
                 totalFreestyle9100Count += solutionLocations[i].Freestyle9100Count;
-
-                totalFootfall += Locations[i].Footfall;
             }
 
             var totalLeasingCost = totalFreestyle3100Count * _generalData.Freestyle3100Data.LeasingCostPerWeek + totalFreestyle9100Count * _generalData.Freestyle9100Data.LeasingCostPerWeek;
             var kgCo2Savings = totalSales * (_generalData.ClassicUnitData.Co2PerUnitInGrams - _generalData.RefillUnitData.Co2PerUnitInGrams) / 1000;
-            var totalRevenue = Round(totalSales * _generalData.RefillUnitData.ProfitPerUnit);
-
+            var totalRevenue = Math.Round(totalSales * _generalData.RefillUnitData.ProfitPerUnit,2);
+            totalFootfall = Math.Round(CalculateFootfall(solutionLocations) / 1000,4);
             
             //Just some rounding for nice whole numbers
-            kgCo2Savings = Round(kgCo2Savings - totalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000 - totalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000);
+            kgCo2Savings = Math.Round(kgCo2Savings - totalFreestyle3100Count * _generalData.Freestyle3100Data.StaticCo2 / 1000 - totalFreestyle9100Count * _generalData.Freestyle9100Data.StaticCo2 / 1000,2);
 
             //Calculate Earnings
-            var earnings = totalRevenue - totalLeasingCost;
+            var earnings = (totalRevenue - totalLeasingCost)/1000;
 
             //Calculate total score
-            return Round((kgCo2Savings * _generalData.Co2PricePerKiloInSek + earnings) * (1 + totalFootfall));
+            var totalScore=Math.Round((kgCo2Savings * _generalData.Co2PricePerKiloInSek + earnings) * (1 + totalFootfall),2);
+            return totalScore;
+        }
+
+        private double CalculateFootfall(SolutionLocation[] solutionLocations)
+        {
+            var totalFootfall = 0.0;
+            for (var i = 0; i < _numLocations; i++)
+            {
+                if (solutionLocations[i].Freestyle3100Count == 0 && solutionLocations[i].Freestyle9100Count == 0)
+                    continue;
+
+                var count = 1;
+                for (int j = 0; j < Neighbours[i].Count; j++)
+                {
+                    if (solutionLocations[Neighbours[i][j].index].Freestyle3100Count == 0 && solutionLocations[Neighbours[i][j].index].Freestyle9100Count == 0)
+                        continue;
+                    count++;
+                }
+
+                totalFootfall += Locations[i].Footfall / count;
+            }
+
+            return totalFootfall;
         }
 
         private static long Round(double d)
