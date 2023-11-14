@@ -112,7 +112,7 @@ public class HenrikDennisSolver1
                 TryPlusOneAndMinusOneOnNeighbour(sol),
                 TryPlusOneAndMinusTwoOnNeighbours(sol),
                 TryPlusOneAndMinusThreeOnNeighbours(sol),
-                // TryOptimizeNeighbourhoods(sol, 5),
+                // TryOptimizeNeighbourhoods(sol, 6),
             };
 
             var best = optimizations.MaxBy(o => o.score);
@@ -141,51 +141,83 @@ public class HenrikDennisSolver1
         var bestScore = _model.CalculateScore(bestSolution);
         var workingCopy = (DennisModel.SolutionLocation[])bestSolution.Clone();
 
-        foreach(var neighbourhood in _neighbourhoodWithTwo)
-        {
-            foreach (var a in SolutionLocationsInOrder)
-            foreach (var b in SolutionLocationsInOrder)
+        
+        if(maxNeighborhoodSize >= 6)
+            foreach (var neighbourhood in _neighbourhoodWithSix)
             {
-                Array.Copy(bestSolution, workingCopy, bestSolution.Length);
-                workingCopy[neighbourhood[0]] = a;
-                workingCopy[neighbourhood[1]] = b;
-                var score = _model.CalculateScore(workingCopy);
-                if (score > bestScore)
+                var numSmallGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
+                var numBigGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
+            
+                foreach (var a in SolutionLocationsInOrder)
+                foreach (var b in SolutionLocationsInOrder)
+                foreach (var c in SolutionLocationsInOrder)
+                foreach (var d in SolutionLocationsInOrder)
+                foreach (var e in SolutionLocationsInOrder)
+                foreach (var f in SolutionLocationsInOrder)
                 {
-                    bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
-                    bestScore = score;
-                    _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    Array.Copy(bestSolution, workingCopy, bestSolution.Length);
+                    workingCopy[neighbourhood[0]] = a;
+                    workingCopy[neighbourhood[1]] = b;
+                    workingCopy[neighbourhood[2]] = c;
+                    workingCopy[neighbourhood[3]] = d;
+                    workingCopy[neighbourhood[4]] = e;
+                    workingCopy[neighbourhood[5]] = f;
+
+                    var numSmall = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
+                    if (numSmall != numSmallGoal)
+                        continue;
+                    var numBig = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
+                    if (numBig != numBigGoal)
+                        continue;
+                
+                    var score = _model.CalculateScore(workingCopy);
+                    if (score > bestScore)
+                    {
+                        bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
+                        bestScore = score;
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    }
                 }
             }
-        }
-
-        if (maxNeighborhoodSize == 2)
-            return (bestSolution, bestScore);
-
-        foreach (var neighbourhood in _neighbourhoodWithThree)
-        {
-            foreach (var a in SolutionLocationsInOrder)
-            foreach (var b in SolutionLocationsInOrder)
-            foreach (var c in SolutionLocationsInOrder)
+        
+        if(maxNeighborhoodSize >= 5)
+            foreach (var neighbourhood in _neighbourhoodWithFive)
             {
-                Array.Copy(bestSolution, workingCopy, bestSolution.Length);
-                workingCopy[neighbourhood[0]] = a;
-                workingCopy[neighbourhood[1]] = b;
-                workingCopy[neighbourhood[2]] = c;
-                var score = _model.CalculateScore(workingCopy);
-                if (score > bestScore)
+                var numSmallGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
+                var numBigGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
+            
+                foreach (var a in SolutionLocationsInOrder)
+                foreach (var b in SolutionLocationsInOrder)
+                foreach (var c in SolutionLocationsInOrder)
+                foreach (var d in SolutionLocationsInOrder)
+                foreach (var e in SolutionLocationsInOrder)
                 {
-                    bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
-                    bestScore = score;
-                    _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    Array.Copy(bestSolution, workingCopy, bestSolution.Length);
+                    workingCopy[neighbourhood[0]] = a;
+                    workingCopy[neighbourhood[1]] = b;
+                    workingCopy[neighbourhood[2]] = c;
+                    workingCopy[neighbourhood[3]] = d;
+                    workingCopy[neighbourhood[4]] = e;
+
+                    var numSmall = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
+                    if (numSmall != numSmallGoal)
+                        continue;
+                    var numBig = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
+                    if (numBig != numBigGoal)
+                        continue;
+                
+                    var score = _model.CalculateScore(workingCopy);
+                    if (score > bestScore)
+                    {
+                        bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
+                        bestScore = score;
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    }
                 }
             }
-        }
         
-        if (maxNeighborhoodSize == 3)
-            return (bestSolution, bestScore);
-
         
+        if(maxNeighborhoodSize >= 4)
         foreach (var neighbourhood in _neighbourhoodWithFour)
         {
             var numSmallGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
@@ -218,87 +250,48 @@ public class HenrikDennisSolver1
                 }
             }
         }
-
-        if (maxNeighborhoodSize == 4)
-            return (bestSolution, bestScore);
-
         
-        foreach (var neighbourhood in _neighbourhoodWithFive)
-        {
-            var numSmallGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
-            var numBigGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
-            
-            foreach (var a in SolutionLocationsInOrder)
-            foreach (var b in SolutionLocationsInOrder)
-            foreach (var c in SolutionLocationsInOrder)
-            foreach (var d in SolutionLocationsInOrder)
-            foreach (var e in SolutionLocationsInOrder)
+        if(maxNeighborhoodSize >= 3)
+            foreach (var neighbourhood in _neighbourhoodWithThree)
             {
-                Array.Copy(bestSolution, workingCopy, bestSolution.Length);
-                workingCopy[neighbourhood[0]] = a;
-                workingCopy[neighbourhood[1]] = b;
-                workingCopy[neighbourhood[2]] = c;
-                workingCopy[neighbourhood[3]] = d;
-                workingCopy[neighbourhood[4]] = e;
-
-                var numSmall = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
-                if (numSmall != numSmallGoal)
-                    continue;
-                var numBig = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
-                if (numBig != numBigGoal)
-                    continue;
-                
-                var score = _model.CalculateScore(workingCopy);
-                if (score > bestScore)
+                foreach (var a in SolutionLocationsInOrder)
+                foreach (var b in SolutionLocationsInOrder)
+                foreach (var c in SolutionLocationsInOrder)
                 {
-                    bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
-                    bestScore = score;
-                    _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    Array.Copy(bestSolution, workingCopy, bestSolution.Length);
+                    workingCopy[neighbourhood[0]] = a;
+                    workingCopy[neighbourhood[1]] = b;
+                    workingCopy[neighbourhood[2]] = c;
+                    var score = _model.CalculateScore(workingCopy);
+                    if (score > bestScore)
+                    {
+                        bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
+                        bestScore = score;
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    }
                 }
             }
-        }
         
-        if (maxNeighborhoodSize == 5)
-            return (bestSolution, bestScore);
-
-
-        foreach (var neighbourhood in _neighbourhoodWithSix)
-        {
-            var numSmallGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
-            var numBigGoal = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
-            
-            foreach (var a in SolutionLocationsInOrder)
-            foreach (var b in SolutionLocationsInOrder)
-            foreach (var c in SolutionLocationsInOrder)
-            foreach (var d in SolutionLocationsInOrder)
-            foreach (var e in SolutionLocationsInOrder)
-            foreach (var f in SolutionLocationsInOrder)
+        if(maxNeighborhoodSize >= 2)
+            foreach(var neighbourhood in _neighbourhoodWithTwo)
             {
-                Array.Copy(bestSolution, workingCopy, bestSolution.Length);
-                workingCopy[neighbourhood[0]] = a;
-                workingCopy[neighbourhood[1]] = b;
-                workingCopy[neighbourhood[2]] = c;
-                workingCopy[neighbourhood[3]] = d;
-                workingCopy[neighbourhood[4]] = e;
-                workingCopy[neighbourhood[5]] = f;
-
-                var numSmall = neighbourhood.Sum(n => bestSolution[n].Freestyle3100Count);
-                if (numSmall != numSmallGoal)
-                    continue;
-                var numBig = neighbourhood.Sum(n => bestSolution[n].Freestyle9100Count);
-                if (numBig != numBigGoal)
-                    continue;
-                
-                var score = _model.CalculateScore(workingCopy);
-                if (score > bestScore)
+                foreach (var a in SolutionLocationsInOrder)
+                foreach (var b in SolutionLocationsInOrder)
                 {
-                    bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
-                    bestScore = score;
-                    _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    Array.Copy(bestSolution, workingCopy, bestSolution.Length);
+                    workingCopy[neighbourhood[0]] = a;
+                    workingCopy[neighbourhood[1]] = b;
+                    var score = _model.CalculateScore(workingCopy);
+                    if (score > bestScore)
+                    {
+                        bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
+                        bestScore = score;
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    }
                 }
             }
-        }
 
+        
         return (bestSolution, bestScore);
     }
 
@@ -335,53 +328,8 @@ public class HenrikDennisSolver1
         },
         new()
         {
-            Freestyle9100Count = 3,
-            Freestyle3100Count = 0
-        },
-        new()
-        {
-            Freestyle9100Count = 3,
-            Freestyle3100Count = 1
-        },
-        new()
-        {
-            Freestyle9100Count = 4,
-            Freestyle3100Count = 0
-        },
-        new()
-        {
-            Freestyle9100Count = 4,
-            Freestyle3100Count = 1
-        },
-        new()
-        {
-            Freestyle9100Count = 5,
-            Freestyle3100Count = 0
-        },
-        new()
-        {
-            Freestyle9100Count = 5,
-            Freestyle3100Count = 1
-        },
-        new()
-        {
-            Freestyle9100Count = 5,
+            Freestyle9100Count = 2,
             Freestyle3100Count = 2
-        },
-        new()
-        {
-            Freestyle9100Count = 5,
-            Freestyle3100Count = 3
-        },
-        new()
-        {
-            Freestyle9100Count = 5,
-            Freestyle3100Count = 4
-        },
-        new()
-        {
-            Freestyle9100Count = 5,
-            Freestyle3100Count = 5
         },
     };
 

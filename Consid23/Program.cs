@@ -26,7 +26,7 @@ ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData
 var clustered = mapData;
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
 
-Parallel.For(1, 200, DoWorkInOneThread);
+Parallel.For(1, 11, DoWorkInOneThread);
 
 sw.Stop();
 
@@ -43,10 +43,13 @@ Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameSco
 return;
 
 
+// Max Goteborg: 6166,82
+// Score local 6166,82 0,0324 4644,99 1049,594
+
 void DoWorkInOneThread(int ix)
 {
     var localMapData = clustered.Clone();
-    localMapData.RandomizeLocationOrder(ix*ix+500);
+    localMapData.RandomizeLocationOrder(ix);
     var model = new DennisModel(generalData, localMapData);
 
     // var startPoint1 = new SubmitSolution()
