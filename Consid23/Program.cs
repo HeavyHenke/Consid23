@@ -4,7 +4,7 @@ using Considition2023_Cs;
 
 const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 
-var mapName = MapNames.Goteborg;
+var mapName = MapNames.GSandbox;
 
 HttpClient client = new();
 Api api = new(client);
@@ -18,13 +18,14 @@ SubmitSolution? bestSol = null;
 
 var sw = Stopwatch.StartNew();
 
-/*
-var clustered = new SandboxClusterHotspotsToLocations(generalData).ClusterHotspots(mapData);
-ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
-*/
 
-var clustered = mapData;
+var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(generalData);
+var clustered = sandboxClusterHotspotsToLocations.ClusterHotspots(mapData);
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
+
+
+//var clustered = mapData;
+//ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
 
 Parallel.For(1, 11, DoWorkInOneThread);
 
@@ -33,12 +34,12 @@ sw.Stop();
 submitter.Dispose();
 Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
-var localScore = new Scoring(generalData, clustered).CalculateScore(bestSol);
+var localScore = new ScoringHenrik(generalData, clustered).CalculateScore(bestSol);
 
 // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
 // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
 Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
-// api.Sumbit(mapName, bestSol, apikey);
+api.Sumbit(mapName, bestSol, apikey);
 
 return;
 
@@ -50,22 +51,26 @@ void DoWorkInOneThread(int ix)
 {
     var localMapData = clustered.Clone();
     localMapData.RandomizeLocationOrder(ix);
-    var model = new DennisModel(generalData, localMapData);
+    //var model = new DennisModel(generalData, localMapData);
 
     // var startPoint1 = new SubmitSolution()
     // {
     //     Locations = new()
     // };
-    var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
+    // var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
     // var score1 = model.CalculateScore(model.ConvertFromSubmitSolution(startPoint1));
     
-    var lastSol = new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint1);
-    var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
+    var lastSol = new HenrikSolver1(generalData, localMapData, submitter).CalcSolution();
+    //var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
 
     // var solver = new HenrikSolver1(generalData, localMapData, submitter);
     // var solution = solver.CalcSolution();
-    // var score = new Scoring(generalData, localMapData).CalculateScore(lastSol);
-    // score2 = score.GameScore!.Total;
+    sandboxClusterHotspotsToLocations.OptimizeByMovingALittle(lastSol, localMapData);
+    // med move: 2039,96
+    // utan move 2030,33
+    
+    var score = new Scoring(generalData, localMapData).CalculateScore(lastSol);
+    var score2 = score.GameScore!.Total;
 
     lock (lck)
     {

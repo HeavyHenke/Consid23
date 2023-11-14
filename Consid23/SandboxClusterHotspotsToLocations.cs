@@ -97,30 +97,82 @@ public class SandboxClusterHotspotsToLocations
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["gasStation"], maxGasStation));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["convenience"], maxConvenience));
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], maxGroceryStore));
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], 15));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], 2));
 
+        locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
         {
             string locationName = "location" + locationNum++;
             var lat = clusters[i].CenterLat;
             var lon = clusters[i].CenterLong;
+
+            if (lat > output.Border.LatitudeMax)
+                lat = output.Border.LatitudeMax;
+            if (lat < output.Border.LatitudeMin)
+                lat = output.Border.LatitudeMin;
+            if (lon > output.Border.LongitudeMax)
+                lon = output.Border.LongitudeMax;
+            if (lon < output.Border.LongitudeMin)
+                lon = output.Border.LongitudeMin;
             
             output.locations.Add(locationName,
                 new StoreLocation
                 {
                     LocationName = locationName,
                     LocationType = toPlace[i].Type,
-                    Latitude = lat,// clusters[i].CenterLat,
-                    Longitude = lon,// clusters[i].CenterLong,
+                    Latitude = lat,
+                    Longitude = lon,
                     SalesVolume = toPlace[i].SalesVolume
                 });
         }
-        // 3299,53 om vi väljer ena hotspoten endast
-        // 3327,95 om vi sätter något i centrum
-       
         
         return output;
+    }
+
+    public void OptimizeByMovingALittle(SubmitSolution sol, MapData mapData)
+    {
+        var scoring = new ScoringHenrik(_generalData, mapData);
+
+        foreach (var (name, loc) in sol.Locations)
+        {
+            // Flytta rakt
+            MoveLocation(scoring, mapData.Border, sol, loc, 0.003, 0);
+            MoveLocation(scoring, mapData.Border, sol, loc, -0.003, 0);
+            MoveLocation(scoring, mapData.Border, sol, loc, 0, 0.003);
+            MoveLocation(scoring, mapData.Border, sol, loc, 0, -0.003);
+            
+            // Flytta diagonalt
+            MoveLocation(scoring, mapData.Border, sol, loc, 0.002, 0.002);
+            MoveLocation(scoring, mapData.Border, sol, loc, -0.002, -0.002);
+            MoveLocation(scoring, mapData.Border, sol, loc, -0.002, 0.002);
+            MoveLocation(scoring, mapData.Border, sol, loc, 0.002, -0.002);
+        }
+    }
+
+    private static void MoveLocation(IScoring scoring, Border border, SubmitSolution sol, PlacedLocations placed, double dlong, double dlat)
+    {
+        //var startScore = scoring.CalculateScore(sol).GameScore.Total;
+        var startScore = Math.Abs(1859.5 - scoring.CalculateScore(sol).GameScore.Total);
+        while (true)
+        {
+            placed.Longitude += dlong;
+            placed.Latitude += dlat;
+
+            //var score = scoring.CalculateScore(sol).GameScore.Total;
+            var score = Math.Abs(1859.5 - scoring.CalculateScore(sol).GameScore.Total);
+            if (score < startScore && 
+                placed.Latitude > border.LatitudeMin && placed.Latitude < border.LatitudeMax && 
+                placed.Longitude > border.LongitudeMin && placed.Longitude < border.LongitudeMax)
+            {
+                startScore = score;
+                continue;
+            }
+
+            placed.Longitude -= dlong;
+            placed.Latitude -= dlat;
+            return;
+        }
     }
     
     private static int DistanceBetweenPoint(double latitude1, double longitude1, double latitude2, double longitude2)
