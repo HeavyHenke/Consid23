@@ -49,7 +49,7 @@ public class HenrikDennisOptimizer2Gradient
 
             if (latestBest != default)
             {
-                Console.WriteLine($"Optimized using {latestBest.optimizationName}, earned {latestBest.score - currScore}");
+                // Console.WriteLine($"Optimized using {latestBest.optimizationName}, earned {latestBest.score - currScore}");
                 currScore = latestBest.score;
                 sol = latestBest.sol!;
                 _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));

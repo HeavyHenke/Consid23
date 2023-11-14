@@ -21,6 +21,8 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
     public void AddSolutionToSubmit(SubmitSolution sol)
     {
         var score = _scorer.CalculateScore(sol);
+        if (score?.GameScore == null)
+            return;
 
         lock(this)
         if (score.GameScore!.Total > _maxSubmitted)

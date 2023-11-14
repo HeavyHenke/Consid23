@@ -4,71 +4,39 @@ using Considition2023_Cs;
 
 const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 
-// Console.WriteLine($"1: {MapNames.Stockholm}");
-// Console.WriteLine($"2: {MapNames.Goteborg}");
-// Console.WriteLine($"3: {MapNames.Malmo}");
-// Console.WriteLine($"4: {MapNames.Uppsala}");
-// Console.WriteLine($"5: {MapNames.Vasteras}");
-// Console.WriteLine($"6: {MapNames.Orebro}");
-// Console.WriteLine($"7: {MapNames.London}");
-// Console.WriteLine($"8: {MapNames.Linkoping}");
-// Console.WriteLine($"9: {MapNames.Berlin}");
-//
-// Console.Write("Select the map you wish to play: ");
-// string option = Console.ReadLine();
-//
-// var mapName = option switch
-// {
-//     "1" => MapNames.Stockholm,
-//     "2" => MapNames.Goteborg,
-//     "3" => MapNames.Malmo,
-//     "4" => MapNames.Uppsala,
-//     "5" => MapNames.Vasteras,
-//     "6" => MapNames.Orebro,
-//     "7" => MapNames.London,
-//     "8" => MapNames.Linkoping,
-//     "9" => MapNames.Berlin,
-//     _ => null
-// };
-//
-// if (mapName is null)
-// {
-//     Console.WriteLine("Invalid map selected");
-//     return;
-// }
-
-var mapName = MapNames.GSandbox;
+var mapName = MapNames.Goteborg;
 
 HttpClient client = new();
 Api api = new(client);
 MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
 
-var sw = Stopwatch.StartNew();
-
-var clustered = new SandboxClusterHotspotsToLocations(generalData).ClusterHotspots(mapData);
-
 object lck = new object();
 double best = -100000;
 SubmitSolution? bestSol = null;
 
+
+var sw = Stopwatch.StartNew();
+
+/*
+var clustered = new SandboxClusterHotspotsToLocations(generalData).ClusterHotspots(mapData);
+ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
+*/
+
+var clustered = mapData;
 ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
 
-
-Parallel.For(1, 10, DoWorkInOneThread);
+Parallel.For(1, 200, DoWorkInOneThread);
 
 sw.Stop();
 
 submitter.Dispose();
 Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
-// mapData.locations.Clear();
 var localScore = new Scoring(generalData, clustered).CalculateScore(bestSol);
-
 
 // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
 // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
-// var localScore = new Scoring(generalData, mapData).CalculateScore(bestSol!);
 Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
 // api.Sumbit(mapName, bestSol, apikey);
 
@@ -78,42 +46,32 @@ return;
 void DoWorkInOneThread(int ix)
 {
     var localMapData = clustered.Clone();
-    localMapData.RandomizeLocationOrder(ix);
-    //var model = new DennisModel(generalData, localMapData);
-    
-    //var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
+    localMapData.RandomizeLocationOrder(ix*ix+500);
+    var model = new DennisModel(generalData, localMapData);
+
+    // var startPoint1 = new SubmitSolution()
+    // {
+    //     Locations = new()
+    // };
+    var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
     // var score1 = model.CalculateScore(model.ConvertFromSubmitSolution(startPoint1));
     
-    //var lastSol = new HenrikDennisOptimizer2Gradient(model, submitter).OptimizeSolution(startPoint1);
-    //var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
+    var lastSol = new HenrikDennisSolver1(model, submitter).OptimizeSolution(startPoint1);
+    var score2 = model.CalculateScore(model.ConvertFromSubmitSolution(lastSol));
 
-    var solver = new HenrikSolver1(generalData, localMapData, submitter);
-    var solution = solver.CalcSolution();
-    var score = new ScoringHenrik(generalData, localMapData).CalculateScore(solution);
-    var score2 = score.GameScore!.Total;
+    // var solver = new HenrikSolver1(generalData, localMapData, submitter);
+    // var solution = solver.CalcSolution();
+    // var score = new Scoring(generalData, localMapData).CalculateScore(lastSol);
+    // score2 = score.GameScore!.Total;
 
     lock (lck)
     {
         if (score2 > best)
         {
             best = score2;
-            bestSol = solution;
+            bestSol = lastSol;
         }
     }
     
     Console.WriteLine($"Best score found: {score2}");
 }
-
-// GameData score = new Scoring(generalData, mapData).CalculateScore(solution);
-// Console.WriteLine($"GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
-
-// Console.WriteLine("Press S to submit");
-//
-// var inp = Console.ReadKey();
-// if (inp.Key == ConsoleKey.S)
-// {
-//     GameData prodScore = await api.SumbitAsync(mapName, solution, apikey);
-//     Console.WriteLine($"GameId: {prodScore.Id}");
-//     Console.WriteLine($"Server score: {prodScore.GameScore.Total}");
-//     Console.ReadLine();
-// }
