@@ -37,37 +37,25 @@ const string apikey = "347f7d9f-c846-4bdf-a0be-d82da397dbe8";
 //     return;
 // }
 
-var mapName = MapNames.Uppsala;
+var mapName = MapNames.GSandbox;
 
 HttpClient client = new();
 Api api = new(client);
 MapData mapData = await api.GetMapDataAsync(mapName, apikey);
 GeneralData generalData = await api.GetGeneralDataAsync();
-ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
-
-// int locIx = 1;
-// foreach (var hp in mapData.Hotspots.Take(5))
-// {
-//     var locName = "location"+ locIx++;
-//     mapData.locations.Add(locName,
-//         new StoreLocation
-//         {
-//             LocationName = locName,
-//             LocationType = "Grocery-store-large",
-//             Footfall = hp.Footfall,
-//             SalesVolume = generalData.LocationTypes["groceryStoreLarge"].SalesVolume,
-//             Longitude = hp.Longitude,
-//             Latitude = hp.Latitude,
-//             footfallScale = 1
-//         });
-// }
 
 var sw = Stopwatch.StartNew();
+
+var clustered = new SandboxClusterHotspotsToLocations(generalData).ClusterHotspots(mapData);
+
 object lck = new object();
 double best = -100000;
 SubmitSolution? bestSol = null;
 
-Parallel.For(1, 2, DoWorkInOneThread);
+ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
+
+
+Parallel.For(1, 10, DoWorkInOneThread);
 
 sw.Stop();
 
@@ -75,7 +63,7 @@ submitter.Dispose();
 Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
 // mapData.locations.Clear();
-var localScore = new Scoring(generalData, mapData).CalculateScore(bestSol);
+var localScore = new Scoring(generalData, clustered).CalculateScore(bestSol);
 
 
 // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
@@ -89,7 +77,7 @@ return;
 
 void DoWorkInOneThread(int ix)
 {
-    var localMapData = mapData.Clone();
+    var localMapData = clustered.Clone();
     localMapData.RandomizeLocationOrder(ix);
     //var model = new DennisModel(generalData, localMapData);
     
@@ -101,7 +89,7 @@ void DoWorkInOneThread(int ix)
 
     var solver = new HenrikSolver1(generalData, localMapData, submitter);
     var solution = solver.CalcSolution();
-    var score = new ScoringHenrik(generalData, mapData).CalculateScore(solution);
+    var score = new ScoringHenrik(generalData, localMapData).CalculateScore(solution);
     var score2 = score.GameScore!.Total;
 
     lock (lck)

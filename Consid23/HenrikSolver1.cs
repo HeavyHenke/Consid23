@@ -270,9 +270,9 @@ public class HenrikSolver1
             {
                 Freestyle3100Count = 1,
                 Freestyle9100Count = 0,
-                // Longitude = _mapData.locations[location].Longitude,
-                // Latitude = _mapData.locations[location].Latitude,
-                // LocationType = _mapData.locations[location].LocationType
+                Longitude = _mapData.locations[location].Longitude,
+                Latitude = _mapData.locations[location].Latitude,
+                LocationType = _mapData.locations[location].LocationType
             });
         }
         else if (loc.Freestyle3100Count == 0)
