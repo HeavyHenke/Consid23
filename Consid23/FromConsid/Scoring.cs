@@ -48,8 +48,7 @@
                 GameScore = new()
             };
 
-            List<string> sandboxMaps = SandBoxMaps;
-            if (sandboxMaps.Contains(_mapEntity.MapName) == false)
+            if (SandBoxMaps.Contains(_mapEntity.MapName) == false)
             {
                 //Separate locations on the map into dict for those that have a refill station and those who have not.
                 Dictionary<string, StoreLocationScoring> locationListNoRefillStation = new();
@@ -81,7 +80,6 @@
                         if (scoredSolution.Locations[kvp.Key].SalesCapacity > 0 == false)
                         {
                             return null;
-
                         }
                     }
                     else
@@ -114,7 +112,7 @@
             foreach (KeyValuePair<string, StoreLocationScoring> kvp in scoredSolution.Locations)
             {
                 kvp.Value.SalesVolume = Math.Round(kvp.Value.SalesVolume, 0);
-                if (kvp.Value.Footfall <= 0 && sandboxMaps.Contains(_mapEntity.MapName) == true)
+                if (kvp.Value.Footfall <= 0 && SandBoxMaps.Contains(_mapEntity.MapName) == true)
                 {
                     kvp.Value.SalesVolume = 0;
                 }

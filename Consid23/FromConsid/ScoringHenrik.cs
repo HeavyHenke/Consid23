@@ -1,10 +1,12 @@
-﻿namespace Considition2023_Cs;
+﻿using System.Collections.Frozen;
+
+namespace Considition2023_Cs;
 
 public class ScoringHenrik : IScoring
 {
     private readonly GeneralData _generalData;
     private readonly MapData _mapEntity;
-    private readonly Dictionary<string, List<(string neighbour, int distance)>> _neighbours = new();
+    private readonly FrozenDictionary<string, List<(string neighbour, int distance)>> _neighbours;
 
     public ScoringHenrik(GeneralData generalData, MapData mapEntity)
     {
@@ -12,10 +14,11 @@ public class ScoringHenrik : IScoring
         _mapEntity = mapEntity;
 
         // Calculate all neighbours
+        var items = new List<(string key, List<(string neighbour, int distance)> neighbours)>(mapEntity.locations.Count);
         foreach (var loc1 in mapEntity.locations.Values)
         {
             var list = new List<(string neighbour, int distance)>();
-            _neighbours.Add(loc1.LocationName, list);
+            items.Add((loc1.LocationName, list));
             foreach (var loc2 in mapEntity.locations.Values)
             {
                 if (loc2.LocationName == loc1.LocationName)
@@ -28,6 +31,8 @@ public class ScoringHenrik : IScoring
                 }
             }
         }
+
+        _neighbours = items.ToFrozenDictionary(key => key.key, val => val.neighbours);
     }
         
         public GameData CalculateScore(SubmitSolution solution)
