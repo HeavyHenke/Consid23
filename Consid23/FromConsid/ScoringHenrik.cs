@@ -159,6 +159,10 @@ public class ScoringHenrik : IScoring
                 (1 + scoredSolution.GameScore.TotalFootfall),
                 2
             );
+
+            // if (scoredSolution.GameScore.Total > 2343.9)
+            //     scoredSolution.GameScore.Total = -1;
+            
             return scoredSolution;
         }
 

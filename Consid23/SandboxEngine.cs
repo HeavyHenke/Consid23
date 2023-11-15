@@ -36,8 +36,8 @@ public class SandboxEngine
         var localScore = new ScoringHenrik(generalData, clustered).CalculateScore(bestSol);
 
         Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
-// var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
-// Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
+ // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
+ // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
 
         return;
 
