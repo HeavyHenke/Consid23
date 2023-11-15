@@ -247,7 +247,7 @@ public class HenrikDennisOptimizer2Gradient
         if (sol[index].Freestyle9100Count > 0)
         {
             sol[index].Freestyle9100Count--;
-            sol[index].Freestyle3100Count++;
+            sol[index].Freestyle3100Count += 2;
             return true;
         }
 
@@ -257,18 +257,18 @@ public class HenrikDennisOptimizer2Gradient
     private static bool AddOneAt(DennisModel.SolutionLocation[] sol, int index)
     {
         var loc = sol[index];
-        if (loc.Freestyle3100Count == 0)
+        if (loc.Freestyle3100Count < 2)
         {
-            sol[index].Freestyle3100Count = 1;
+            sol[index].Freestyle3100Count++;
             return true;
         }
-        if (loc.Freestyle9100Count < 5)
+        if (loc.Freestyle9100Count < 2)
         {
-            sol[index].Freestyle3100Count--;
+            sol[index].Freestyle3100Count = 0;
             sol[index].Freestyle9100Count++;
             return true;
         }
         return false;
     }
-    
+   
 }

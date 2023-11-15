@@ -98,7 +98,7 @@ public class SandboxClusterHotspotsToLocations
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["gasStation"], maxGasStation));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["convenience"], maxConvenience));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], maxGroceryStore));
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], 2));
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
 
         locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
@@ -152,16 +152,16 @@ public class SandboxClusterHotspotsToLocations
 
     private static void MoveLocation(IScoring scoring, Border border, SubmitSolution sol, PlacedLocations placed, double dlong, double dlat)
     {
-        //var startScore = scoring.CalculateScore(sol).GameScore.Total;
-        var startScore = Math.Abs(2320.5 - scoring.CalculateScore(sol).GameScore.Total);
+        var startScore = scoring.CalculateScore(sol).GameScore.Total;
+        // var startScore = Math.Abs(2320.5 - scoring.CalculateScore(sol).GameScore.Total);
         while (true)
         {
             placed.Longitude += dlong;
             placed.Latitude += dlat;
 
-            //var score = scoring.CalculateScore(sol).GameScore.Total;
-            var score = Math.Abs(2320.5 - scoring.CalculateScore(sol).GameScore.Total);
-            if (score < startScore && 
+            var score = scoring.CalculateScore(sol).GameScore.Total;
+            // var score = Math.Abs(2320.5 - scoring.CalculateScore(sol).GameScore.Total);
+            if (score > startScore && 
                 placed.Latitude > border.LatitudeMin && placed.Latitude < border.LatitudeMax && 
                 placed.Longitude > border.LongitudeMin && placed.Longitude < border.LongitudeMax)
             {

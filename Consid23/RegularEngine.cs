@@ -23,7 +23,7 @@ public class RegularEngine
 
         ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
 
-        Parallel.For(1, 11, DoWorkInOneThread);
+        Parallel.For(1, 100, DoWorkInOneThread);
 
         sw.Stop();
 
@@ -39,19 +39,18 @@ public class RegularEngine
         return;
 
 
-// Max Goteborg: 6166,82
-// Score local 6166,82 0,0324 4644,99 1049,594
+// Max Goteborg: 6169,92
 
         void DoWorkInOneThread(int ix)
         {
             var localMapData = mapData.Clone();
-            localMapData.RandomizeLocationOrder(ix);
+            localMapData.RandomizeLocationOrder(ix+2100);
             var model = new DennisModel(generalData, localMapData);
 
             var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
 
-            var solver = new HenrikDennisSolver1(generalData, localMapData, submitter);
-            // var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
+            //var solver = new HenrikDennisSolver1(generalData, localMapData, submitter);
+            var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
             var solution = solver.OptimizeSolution(startPoint1);
 
             var score = new Scoring(generalData, localMapData).CalculateScore(solution);
