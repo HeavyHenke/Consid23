@@ -6,7 +6,7 @@ public class ScoringHenrik : IScoring
 {
     private readonly GeneralData _generalData;
     private readonly MapData _mapEntity;
-    private readonly FrozenDictionary<string, List<(string neighbour, int distance)>> _neighbours;
+    private readonly Dictionary<string, List<(string neighbour, int distance)>> _neighbours;
 
     public ScoringHenrik(GeneralData generalData, MapData mapEntity)
     {
@@ -32,9 +32,29 @@ public class ScoringHenrik : IScoring
             }
         }
 
-        _neighbours = items.ToFrozenDictionary(key => key.key, val => val.neighbours);
+        _neighbours = items.ToDictionary(key => key.key, val => val.neighbours);
     }
         
+    public void UpdateLocationPos(string name)
+    {
+        var loc1 = _mapEntity.locations[name];
+        var list = new List<(string neighbour, int distance)>();
+        foreach (var loc2 in _mapEntity.locations.Values)
+        {
+            if (loc2.LocationName == name)
+                continue;
+
+            var distance = DistanceBetweenPoint(loc1.Latitude, loc1.Longitude, loc2.Latitude, loc2.Longitude);
+            if (distance < _generalData.WillingnessToTravelInMeters)
+            {
+                
+                list.Add((loc2.LocationName, distance));
+            }
+        }
+
+        _neighbours[name] = list;
+    }
+    
         public GameData CalculateScore(SubmitSolution solution)
         {
             GameData scoredSolution = new()
@@ -110,7 +130,7 @@ public class ScoringHenrik : IScoring
 
             foreach (KeyValuePair<string, StoreLocationScoring> kvp in scoredSolution.Locations)
             {
-                kvp.Value.SalesVolume = Math.Round(kvp.Value.SalesVolume, 0);
+                kvp.Value.SalesVolume = kvp.Value.SalesVolume;
                 if (kvp.Value.Footfall <= 0 && Scoring.SandBoxMaps.Contains(_mapEntity.MapName) == true)
                 {
                     kvp.Value.SalesVolume = 0;
@@ -146,19 +166,17 @@ public class ScoringHenrik : IScoring
             }
 
             //Just some rounding for nice whole numbers
-            scoredSolution.TotalRevenue = Math.Round(scoredSolution.TotalRevenue, 2);
-            scoredSolution.GameScore.KgCo2Savings = Math.Round(scoredSolution.GameScore.KgCo2Savings, 2);
-            scoredSolution.GameScore.TotalFootfall = Math.Round(scoredSolution.GameScore.TotalFootfall, 4);
+            scoredSolution.TotalRevenue = scoredSolution.TotalRevenue;
+            scoredSolution.GameScore.KgCo2Savings = scoredSolution.GameScore.KgCo2Savings;
+            scoredSolution.GameScore.TotalFootfall = scoredSolution.GameScore.TotalFootfall;
 
             //Calculate Earnings
             scoredSolution.GameScore.Earnings = (scoredSolution.TotalRevenue - scoredSolution.TotalLeasingCost) / 1000;
 
             //Calculate total score
-            scoredSolution.GameScore.Total = Math.Round(
+            scoredSolution.GameScore.Total = 
                 (scoredSolution.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek + scoredSolution.GameScore.Earnings) *
-                (1 + scoredSolution.GameScore.TotalFootfall),
-                2
-            );
+                (1 + scoredSolution.GameScore.TotalFootfall);
 
             // if (scoredSolution.GameScore.Total > 2343.9)
             //     scoredSolution.GameScore.Total = -1;

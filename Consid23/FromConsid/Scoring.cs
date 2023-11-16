@@ -3,6 +3,7 @@
     public interface IScoring
     {
         GameData CalculateScore(SubmitSolution solution);
+        void UpdateLocationPos(string name);
     }
 
     public class CompareScoring : IScoring
@@ -23,6 +24,13 @@
                 throw new Exception("Olika poäng!");
             return score1;
         }
+
+        public void UpdateLocationPos(string name)
+        {
+            _scoring1.UpdateLocationPos(name);
+            _scoring2.UpdateLocationPos(name);
+        }
+
     }
 
     public class Scoring : IScoring
@@ -35,6 +43,11 @@
         {
             _generalData = generalData;
             _mapEntity = mapEntity;
+        }
+        
+        public void UpdateLocationPos(string _)
+        {
+            // nop;
         }
         
         public GameData CalculateScore(SubmitSolution solution)

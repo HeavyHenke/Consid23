@@ -169,24 +169,23 @@ public class SandboxClusterHotspotsToLocations
     public void OptimizeByMovingALittle(SubmitSolution sol, MapData mapData)
     {
         var scoring = new ScoringHenrik(_generalData, mapData);
-
         foreach (var (name, loc) in sol.Locations)
         {
             // Flytta rakt
-            MoveLocation(scoring, mapData.Border, sol, loc, 0.003, 0);
-            MoveLocation(scoring, mapData.Border, sol, loc, -0.003, 0);
-            MoveLocation(scoring, mapData.Border, sol, loc, 0, 0.003);
-            MoveLocation(scoring, mapData.Border, sol, loc, 0, -0.003);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, 0.001, 0);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, -0.001, 0);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, 0, 0.001);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, 0, -0.001);
             
             // Flytta diagonalt
-            MoveLocation(scoring, mapData.Border, sol, loc, 0.002, 0.002);
-            MoveLocation(scoring, mapData.Border, sol, loc, -0.002, -0.002);
-            MoveLocation(scoring, mapData.Border, sol, loc, -0.002, 0.002);
-            MoveLocation(scoring, mapData.Border, sol, loc, 0.002, -0.002);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, 0.0001, 0.0001);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, -0.0001, -0.0001);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, -0.0001, 0.0001);
+            MoveLocation(scoring, mapData.Border, sol, loc, name, 0.0001, -0.0001);
         }
     }
 
-    private static void MoveLocation(IScoring scoring, Border border, SubmitSolution sol, PlacedLocations placed, double dlong, double dlat)
+    private static void MoveLocation(IScoring scoring, Border border, SubmitSolution sol, PlacedLocations placed, string name, double dlong, double dlat)
     {
         var startScore = scoring.CalculateScore(sol).GameScore.Total;
         // var startScore = Math.Abs(2320.5 - scoring.CalculateScore(sol).GameScore.Total);
@@ -194,6 +193,7 @@ public class SandboxClusterHotspotsToLocations
         {
             placed.Longitude += dlong;
             placed.Latitude += dlat;
+            scoring.UpdateLocationPos(name);
 
             var score = scoring.CalculateScore(sol).GameScore.Total;
             // var score = Math.Abs(2320.5 - scoring.CalculateScore(sol).GameScore.Total);
@@ -207,6 +207,7 @@ public class SandboxClusterHotspotsToLocations
 
             placed.Longitude -= dlong;
             placed.Latitude -= dlat;
+            scoring.UpdateLocationPos(name);
             return;
         }
     }
