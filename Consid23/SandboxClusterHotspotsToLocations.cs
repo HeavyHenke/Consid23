@@ -50,6 +50,7 @@ public class SandboxClusterHotspotsToLocations
     public MapData ClusterHotspots(MapData input)
     {
         var output = input.Clone();
+        RemoveHotspotsThatAreTooFarOutsideOfBorder(output);
 
         var clusters = new List<Cluster> { new Cluster(input.Hotspots[0], "location1") };
 
@@ -82,10 +83,7 @@ public class SandboxClusterHotspotsToLocations
         {
             cluster.Importance = scoringLoc[cluster.Name].Footfall;
         }
-        // clusters = clusters.OrderBy(c => c.Importance).ToList();
-        // OrderBy           => 3215,45
-        // OrderByDescending => 3184,45
-        // Oordnat => 3257,18
+        clusters = clusters.OrderByDescending(c => c.Importance).ToList();
         
         const int maxGroceryStoreLarge = 5;
         const int maxGroceryStore = 20;
@@ -94,12 +92,12 @@ public class SandboxClusterHotspotsToLocations
         const int maxKiosk = 3;
 
         var toPlace = new List<LocationType>();
-        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["gasStation"], maxGasStation));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["convenience"], maxConvenience));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], maxGroceryStore));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
-
+        toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
+        
         locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
         {
@@ -130,6 +128,44 @@ public class SandboxClusterHotspotsToLocations
         return output;
     }
 
+    private static void RemoveHotspotsThatAreTooFarOutsideOfBorder(MapData md)
+    {
+        for (var i = md.Hotspots.Count - 1; i >= 0; i--)
+        {
+            var hp = md.Hotspots[i];
+            double lat = hp.Latitude;
+            double lon = hp.Longitude;
+            bool changed = false;
+
+            if (hp.Longitude < md.Border.LongitudeMin)
+            {
+                lon = md.Border.LongitudeMin;
+                changed = true;
+            }
+
+            if (hp.Longitude > md.Border.LongitudeMax)
+            {
+                lon = md.Border.LongitudeMax;
+                changed = true;
+            }
+
+            if (hp.Latitude < md.Border.LatitudeMin)
+            {
+                lat = md.Border.LatitudeMin;
+                changed = true;
+            }
+
+            if (hp.Latitude > md.Border.LatitudeMax)
+            {
+                lat = md.Border.LatitudeMax;
+                changed = true;
+            }
+            
+            if(changed && DistanceBetweenPoint(lat, lon, hp.Latitude, hp.Longitude) > hp.Spread)
+                md.Hotspots.RemoveAt(i);
+        }
+    }
+    
     public void OptimizeByMovingALittle(SubmitSolution sol, MapData mapData)
     {
         var scoring = new ScoringHenrik(_generalData, mapData);
