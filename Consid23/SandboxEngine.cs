@@ -49,7 +49,7 @@ public class SandboxEngine
 
             var lastSol = new HenrikSolver1(generalData, localMapData, submitter).CalcSolution();
 
-            sandboxClusterHotspotsToLocations.OptimizeByMovingALittle(lastSol, localMapData);
+            // sandboxClusterHotspotsToLocations.OptimizeByMovingALittle(lastSol, localMapData);
 
             var score = new Scoring(generalData, localMapData).CalculateScore(lastSol);
             var score2 = score.GameScore!.Total;

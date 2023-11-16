@@ -8,9 +8,7 @@ public class SandboxClusterHotspotsToLocations
 
     class Cluster
     {
-        public readonly List<Hotspot> _hotspots;
-        public double CenterLat;
-        public double CenterLong;
+        private readonly List<Hotspot> _hotspots;
         public int Size => _hotspots.Count;
         public string Name { get; }
         public double Importance { get; set; }
@@ -18,27 +16,106 @@ public class SandboxClusterHotspotsToLocations
         public Cluster(Hotspot hotspot, string name)
         {
             _hotspots = new List<Hotspot> { hotspot };
-            CenterLat = hotspot.Latitude;
-            CenterLong = hotspot.Longitude;
             Name = name;
         }
 
         public bool TryAddToCluster(Hotspot h)
         {
-            var latitude = (CenterLat * _hotspots.Count + h.Latitude) / (_hotspots.Count + 1);
-            var longitude = (CenterLong * _hotspots.Count + h.Longitude) / (_hotspots.Count + 1);
+            bool foundConnection = (from existing in _hotspots
+                    let dist = DistanceBetweenPoint(existing.Latitude, existing.Longitude, h.Latitude, h.Longitude)
+                    where dist < existing.Spread
+                    select existing)
+                .Any();
 
-            foreach (var existing in _hotspots.Append(h))
-            {
-                var dist = DistanceBetweenPoint(existing.Latitude, existing.Longitude, latitude, longitude);
-                if (dist > existing.Spread)
-                    return false;
-            }
+            if (!foundConnection)
+                return false;
 
             _hotspots.Add(h);
-            CenterLat = latitude;
-            CenterLong = longitude;
             return true;
+        }
+
+        public IEnumerable<(double lat, double lon, double points)> GetLocations()
+        {
+            const int size = 100;
+
+            var hotSpots = _hotspots.ToList();
+            while (hotSpots.Any())
+            {
+                if (hotSpots.Count == 1 || (hotSpots.Count == 2 && hotSpots.Select(h => (h.Latitude, h.Longitude)).Distinct().Count() == 1))
+                {
+                    yield return (hotSpots[0].Latitude, hotSpots[0].Longitude, GetFootFall(hotSpots[0], 0));
+                    yield break;
+                }
+                
+                var minLat = hotSpots.Select(h => h.Latitude).Min();
+                var maxLat = hotSpots.Select(h => h.Latitude).Max();
+                var minLong = hotSpots.Select(h => h.Longitude).Min();
+                var maxLong = hotSpots.Select(h => h.Longitude).Max();
+                var latPerIx = (maxLat - minLat) / size;
+                var longPerIx = (maxLong - minLong) / size;
+                var meterPerLatIx = DistanceBetweenPointDouble(minLat, (minLong + maxLong) / 2, maxLat, (minLong + maxLong) / 2) / size;
+                var meterPerLongIx = DistanceBetweenPointDouble((minLat + maxLat) / 2, minLong, (minLat + maxLat) / 2, maxLong) / size;
+                var points = new double[size, size];
+
+                foreach (var l in hotSpots)
+                {
+                    var hotSpotLatIx = (l.Latitude - minLat) / latPerIx;
+
+                    for (int latIx = 0; latIx < size; latIx++)
+                    {
+                        var latDistMeters = Math.Abs(latIx - hotSpotLatIx) * meterPerLatIx;
+
+                        for (int longIx = 0; longIx < size; longIx++)
+                        {
+                            var hotSpotLongIx = (l.Longitude - minLong) / longPerIx;
+                            var longDistMeters = Math.Abs(longIx - hotSpotLongIx) * meterPerLongIx;
+
+                            var dist = Math.Sqrt(latDistMeters * latDistMeters + longDistMeters * longDistMeters);
+                            if (dist > l.Spread)
+                                continue;
+
+                            points[latIx, longIx] += GetFootFall(l, dist);
+                        }
+                    }
+                }
+
+                double maxVal = -1;
+                int maxPointLat = -1;
+                int maxPointLong = -1;
+                for (int latIx = 0; latIx < size; latIx++)
+                {
+                    for (int longIx = 0; longIx < size; longIx++)
+                    {
+                        if (points[latIx, longIx] > maxVal)
+                        {
+                            maxVal = points[latIx, longIx];
+                            maxPointLat = latIx;
+                            maxPointLong = longIx;
+                        }
+                    }
+                }
+
+                if (maxPointLat >= 0)
+                {
+                    var lat = minLat + maxPointLat * (maxLat - minLat) / size;
+                    var lon = minLong + maxPointLong * (maxLong - minLong) / size;
+
+                    for (int ix = hotSpots.Count - 1; ix >= 0; ix--)
+                    {
+                        var dist = DistanceBetweenPointDouble(lat, lon, hotSpots[ix].Latitude, hotSpots[ix].Longitude);
+                        if (dist < hotSpots[ix].Spread)
+                            hotSpots.RemoveAt(ix);
+                    }
+                    
+                    yield return (lat, lon, maxVal);
+                }
+            }
+        }
+
+        private static double GetFootFall(Hotspot hs, double distanceInMeters)
+        {
+            double val = hs.Footfall * (1 - (distanceInMeters / hs.Spread));
+            return val / 10;
         }
     }
 
@@ -71,19 +148,9 @@ public class SandboxClusterHotspotsToLocations
                 clusters.Add(new Cluster(input.Hotspots[i], "location" + locationNum++));
         }
 
-        var scoringLoc = clusters.Select((s, i) => new StoreLocationScoring
-        {
-            Longitude = s.CenterLong,
-            Latitude = s.CenterLat,
-            LocationName = s.Name
-        }).ToDictionary(key => key.LocationName, val => val);
-
-        new ScoringHenrik(_generalData, output).CalcualteFootfall(scoringLoc);
-        foreach (var cluster in clusters)
-        {
-            cluster.Importance = scoringLoc[cluster.Name].Footfall;
-        }
-        clusters = clusters.OrderByDescending(c => c.Importance).ToList();
+        var locations = clusters.SelectMany(c => c.GetLocations())
+            .OrderByDescending(c => c.points)
+            .ToList();
         
         const int maxGroceryStoreLarge = 5;
         const int maxGroceryStore = 20;
@@ -97,23 +164,14 @@ public class SandboxClusterHotspotsToLocations
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStore"], maxGroceryStore));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
-        
+
         locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
         {
             string locationName = "location" + locationNum++;
-            var lat = clusters[i].CenterLat;
-            var lon = clusters[i].CenterLong;
+            var lat = locations[i].lat;
+            var lon = locations[i].lon;
 
-            if (lat > output.Border.LatitudeMax)
-                lat = output.Border.LatitudeMax;
-            if (lat < output.Border.LatitudeMin)
-                lat = output.Border.LatitudeMin;
-            if (lon > output.Border.LongitudeMax)
-                lon = output.Border.LongitudeMax;
-            if (lon < output.Border.LongitudeMin)
-                lon = output.Border.LongitudeMin;
-            
             output.locations.Add(locationName,
                 new StoreLocation
                 {
@@ -231,4 +289,22 @@ public class SandboxClusterHotspotsToLocations
         return distance;
     }
 
+    private static double DistanceBetweenPointDouble(double latitude1, double longitude1, double latitude2, double longitude2)
+    {
+        double r = 6371e3;
+        double latRadian1 = latitude1 * Math.PI / 180;
+        double latRadian2 = latitude2 * Math.PI / 180;
+
+        double latDelta = (latitude2 - latitude1) * Math.PI / 180;
+        double longDelta = (longitude2 - longitude1) * Math.PI / 180;
+
+        double a = Math.Sin(latDelta / 2) * Math.Sin(latDelta / 2) +
+                   Math.Cos(latRadian1) * Math.Cos(latRadian2) *
+                   Math.Sin(longDelta / 2) * Math.Sin(longDelta / 2);
+
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        return r * c;
+    }
+    
 }
