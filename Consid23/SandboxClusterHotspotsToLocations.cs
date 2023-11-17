@@ -9,14 +9,10 @@ public class SandboxClusterHotspotsToLocations
     class Cluster
     {
         private readonly List<Hotspot> _hotspots;
-        public int Size => _hotspots.Count;
-        public string Name { get; }
-        public double Importance { get; set; }
 
-        public Cluster(Hotspot hotspot, string name)
+        public Cluster(Hotspot hotspot)
         {
             _hotspots = new List<Hotspot> { hotspot };
-            Name = name;
         }
 
         public bool TryAddToCluster(Hotspot h)
@@ -173,9 +169,8 @@ public class SandboxClusterHotspotsToLocations
         var output = input.Clone();
         RemoveHotspotsThatAreTooFarOutsideOfBorder(output);
 
-        var clusters = new List<Cluster> { new Cluster(input.Hotspots[0], "location1") };
+        var clusters = new List<Cluster> { new Cluster(input.Hotspots[0]) };
 
-        int locationNum = 2;
         for (int i = 1; i < input.Hotspots.Count; i++)
         {
             bool foundCluster = false;
@@ -189,7 +184,7 @@ public class SandboxClusterHotspotsToLocations
             }
 
             if (!foundCluster)
-                clusters.Add(new Cluster(input.Hotspots[i], "location" + locationNum++));
+                clusters.Add(new Cluster(input.Hotspots[i]));
         }
 
         var locations = clusters.SelectMany(c => c.GetLocations())
@@ -209,7 +204,7 @@ public class SandboxClusterHotspotsToLocations
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
 
-        locationNum = 1;
+        int locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
         {
             string locationName = "location" + locationNum++;

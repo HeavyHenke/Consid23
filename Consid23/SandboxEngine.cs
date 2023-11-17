@@ -51,6 +51,12 @@ public class SandboxEngine
 
             // sandboxClusterHotspotsToLocations.OptimizeByMovingALittle(lastSol, localMapData);
 
+            var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
+            if (validation != null)
+            {
+                Console.WriteLine("Error: " + validation);
+            }
+            
             var score = new Scoring(generalData, localMapData).CalculateScore(lastSol);
             var score2 = score.GameScore!.Total;
 

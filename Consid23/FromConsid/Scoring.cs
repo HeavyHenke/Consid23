@@ -334,7 +334,7 @@
             return locations;
         }
 
-        public static string SandboxValidation(string inMapName, SubmitSolution request, MapData mapData)
+        public static string? SandboxValidation(string inMapName, SubmitSolution request, MapData mapData)
         {
             int countGroceryStoreLarge = 0;
             int countGroceryStore = 0;
