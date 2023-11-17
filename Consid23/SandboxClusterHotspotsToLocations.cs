@@ -41,77 +41,121 @@ public class SandboxClusterHotspotsToLocations
             var hotSpots = _hotspots.ToList();
             while (hotSpots.Any())
             {
-                if (hotSpots.Count == 1 || (hotSpots.Count == 2 && hotSpots.Select(h => (h.Latitude, h.Longitude)).Distinct().Count() == 1))
+                if (hotSpots.Count == 1)
                 {
                     yield return (hotSpots[0].Latitude, hotSpots[0].Longitude, GetFootFall(hotSpots[0], 0));
                     yield break;
                 }
                 
-                var minLat = hotSpots.Select(h => h.Latitude).Min();
-                var maxLat = hotSpots.Select(h => h.Latitude).Max();
                 var minLong = hotSpots.Select(h => h.Longitude).Min();
                 var maxLong = hotSpots.Select(h => h.Longitude).Max();
-                var latPerIx = (maxLat - minLat) / size;
-                var longPerIx = (maxLong - minLong) / size;
-                var meterPerLatIx = DistanceBetweenPointDouble(minLat, (minLong + maxLong) / 2, maxLat, (minLong + maxLong) / 2) / size;
-                var meterPerLongIx = DistanceBetweenPointDouble((minLat + maxLat) / 2, minLong, (minLat + maxLat) / 2, maxLong) / size;
-                var points = new double[size, size];
+                var minLat = hotSpots.Select(h => h.Latitude).Min();
+                var maxLat = hotSpots.Select(h => h.Latitude).Max();
 
-                foreach (var l in hotSpots)
+                if (minLong == maxLong && minLat == maxLat)
                 {
-                    var hotSpotLatIx = (l.Latitude - minLat) / latPerIx;
-
-                    for (int latIx = 0; latIx < size; latIx++)
-                    {
-                        var latDistMeters = Math.Abs(latIx - hotSpotLatIx) * meterPerLatIx;
-
-                        for (int longIx = 0; longIx < size; longIx++)
-                        {
-                            var hotSpotLongIx = (l.Longitude - minLong) / longPerIx;
-                            var longDistMeters = Math.Abs(longIx - hotSpotLongIx) * meterPerLongIx;
-
-                            var dist = Math.Sqrt(latDistMeters * latDistMeters + longDistMeters * longDistMeters);
-                            if (dist > l.Spread)
-                                continue;
-
-                            points[latIx, longIx] += GetFootFall(l, dist);
-                        }
-                    }
+                    yield return (hotSpots[0].Latitude, hotSpots[0].Longitude, GetFootFall(hotSpots[0], 0));
+                    yield break;
                 }
-
-                double maxVal = -1;
-                int maxPointLat = -1;
-                int maxPointLong = -1;
-                for (int latIx = 0; latIx < size; latIx++)
-                {
-                    for (int longIx = 0; longIx < size; longIx++)
-                    {
-                        if (points[latIx, longIx] > maxVal)
-                        {
-                            maxVal = points[latIx, longIx];
-                            maxPointLat = latIx;
-                            maxPointLong = longIx;
-                        }
-                    }
-                }
-
+                
+                var points = FillMatrix(hotSpots, size, minLat, maxLat, minLong, maxLong);
+                var (maxPointLat, maxPointLong, maxVal) = GetMaxValue(points, size);
+                
                 if (maxPointLat >= 0)
                 {
                     var lat = minLat + maxPointLat * (maxLat - minLat) / size;
                     var lon = minLong + maxPointLong * (maxLong - minLong) / size;
+                    var usedHotSpots = new List<Hotspot>();
 
                     for (int ix = hotSpots.Count - 1; ix >= 0; ix--)
                     {
                         var dist = DistanceBetweenPointDouble(lat, lon, hotSpots[ix].Latitude, hotSpots[ix].Longitude);
                         if (dist < hotSpots[ix].Spread)
+                        {
+                            usedHotSpots.Add(hotSpots[ix]);
                             hotSpots.RemoveAt(ix);
+                        }
                     }
-                    
+
+                    //yield return OptimizePoint(lat, lon, maxVal, usedHotSpots, (maxLat - minLat) / size, (maxLong - minLong) / size);
                     yield return (lat, lon, maxVal);
+                }
+                else
+                {
+                    Console.WriteLine("Error finding max value");
+                    yield break;
                 }
             }
         }
+        
+        private static (double lat, double lon, double points) OptimizePoint(double lat, double lon, double points, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel)
+        {
+            const int size = 20;
+            var minLat = lat - 2 * latSizePerPixel;
+            var maxLat = lat + 2 * latSizePerPixel;
+            var minLong = lon - 2 * longSizePerPixel;
+            var maxLong = lon + 2 * longSizePerPixel;
+            var matrix = FillMatrix(hotspots, size, minLat, maxLat, minLong, maxLong);
+            var optimizedLocation = GetMaxValue(matrix, size);
+            var optimalLat = minLat + optimizedLocation.latIx * (maxLat - minLat) / size;
+            var optimalLong = minLong + optimizedLocation.longIx * (maxLong - minLong) / size;
+            return (optimalLat, optimalLong, optimizedLocation.points);
+        }
 
+        private static double[,] FillMatrix(List<Hotspot> hotSpots, int size, double minLat, double maxLat, double minLong, double maxLong)
+        {
+            var latPerIx = (maxLat - minLat) / size;
+            var longPerIx = (maxLong - minLong) / size;
+            var meterPerLatIx = DistanceBetweenPointDouble(minLat, (minLong + maxLong) / 2, maxLat, (minLong + maxLong) / 2) / size;
+            var meterPerLongIx = DistanceBetweenPointDouble((minLat + maxLat) / 2, minLong, (minLat + maxLat) / 2, maxLong) / size;
+            var points = new double[size, size];
+
+            foreach (var l in hotSpots)
+            {
+                var hotSpotLatIx = (l.Latitude - minLat) / latPerIx;
+
+                for (int latIx = 0; latIx < size; latIx++)
+                {
+                    var latDistMeters = Math.Abs(latIx - hotSpotLatIx) * meterPerLatIx;
+
+                    for (int longIx = 0; longIx < size; longIx++)
+                    {
+                        var hotSpotLongIx = (l.Longitude - minLong) / longPerIx;
+                        var longDistMeters = Math.Abs(longIx - hotSpotLongIx) * meterPerLongIx;
+
+                        var dist = Math.Sqrt(latDistMeters * latDistMeters + longDistMeters * longDistMeters);
+                        if (dist > l.Spread)
+                            continue;
+
+                        points[latIx, longIx] += GetFootFall(l, dist);
+                    }
+                }
+            }
+
+            return points;
+        }
+
+        private static (int latIx, int longIx, double points) GetMaxValue(double[,] points, int size)
+        {
+            double maxVal = -1;
+            int maxPointLat = -1;
+            int maxPointLong = -1;
+            for (int latIx = 0; latIx < size; latIx++)
+            {
+                for (int longIx = 0; longIx < size; longIx++)
+                {
+                    if (points[latIx, longIx] > maxVal)
+                    {
+                        maxVal = points[latIx, longIx];
+                        maxPointLat = latIx;
+                        maxPointLong = longIx;
+                    }
+                }
+            }
+
+            return (maxPointLat, maxPointLong, maxVal);
+        }
+        
         private static double GetFootFall(Hotspot hs, double distanceInMeters)
         {
             double val = hs.Footfall * (1 - (distanceInMeters / hs.Spread));
