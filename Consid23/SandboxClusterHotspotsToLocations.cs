@@ -32,7 +32,7 @@ public class SandboxClusterHotspotsToLocations
 
         public IEnumerable<(double lat, double lon, double points)> GetLocations()
         {
-            const int size = 100;
+            const int size = 1024;
 
             var hotSpots = _hotspots.ToList();
             while (hotSpots.Any())
@@ -73,8 +73,8 @@ public class SandboxClusterHotspotsToLocations
                         }
                     }
 
-                    //yield return OptimizePoint(lat, lon, maxVal, usedHotSpots, (maxLat - minLat) / size, (maxLong - minLong) / size);
-                    yield return (lat, lon, maxVal);
+                    yield return OptimizePoint(lat, lon, maxVal, usedHotSpots, (maxLat - minLat) / size, (maxLong - minLong) / size);
+                    //yield return (lat, lon, maxVal);
                 }
                 else
                 {
@@ -86,7 +86,7 @@ public class SandboxClusterHotspotsToLocations
         
         private static (double lat, double lon, double points) OptimizePoint(double lat, double lon, double points, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel)
         {
-            const int size = 20;
+            const int size = 1024;
             var minLat = lat - 2 * latSizePerPixel;
             var maxLat = lat + 2 * latSizePerPixel;
             var minLong = lon - 2 * longSizePerPixel;
@@ -119,7 +119,7 @@ public class SandboxClusterHotspotsToLocations
                         var hotSpotLongIx = (l.Longitude - minLong) / longPerIx;
                         var longDistMeters = Math.Abs(longIx - hotSpotLongIx) * meterPerLongIx;
 
-                        var dist = Math.Sqrt(latDistMeters * latDistMeters + longDistMeters * longDistMeters);
+                        var dist = (int)(Math.Sqrt(latDistMeters * latDistMeters + longDistMeters * longDistMeters) + .5);
                         if (dist > l.Spread)
                             continue;
 
@@ -152,7 +152,7 @@ public class SandboxClusterHotspotsToLocations
             return (maxPointLat, maxPointLong, maxVal);
         }
         
-        private static double GetFootFall(Hotspot hs, double distanceInMeters)
+        private static double GetFootFall(Hotspot hs, int distanceInMeters)
         {
             double val = hs.Footfall * (1 - (distanceInMeters / hs.Spread));
             return val / 10;
@@ -204,6 +204,12 @@ public class SandboxClusterHotspotsToLocations
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["groceryStoreLarge"], maxGroceryStoreLarge));
         toPlace.AddRange(Enumerable.Repeat(_generalData.LocationTypes["kiosk"], maxKiosk));
 
+        output.LocationTypeCount.Add("groceryStoreLarge", maxGroceryStoreLarge);
+        output.LocationTypeCount.Add("groceryStore", maxGroceryStore);
+        output.LocationTypeCount.Add("convenience", maxConvenience);
+        output.LocationTypeCount.Add("maxGasStation", maxGasStation);
+        output.LocationTypeCount.Add("kiosk", maxKiosk);
+        
         int locationNum = 1;
         for (int i = 0; i < toPlace.Count; i++)
         {

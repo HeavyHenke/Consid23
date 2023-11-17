@@ -61,7 +61,7 @@ public class SolutionSubmitter : ISolutionSubmitter
                     var score = scoring.CalculateScore(bestScoreItem);
                     if (score.GameScore!.Total > _maxSubmitted)
                     {
-                        //_api.Sumbit(_mapData.MapName, bestScoreItem, _apiKey);
+                        // var serverScore = _api.Sumbit(_mapData.MapName, bestScoreItem, _apiKey);
 
                         _maxSubmitted = score.GameScore.Total;
                         var time = DateTime.Now.ToString("dd_hh_mm_ss");
@@ -69,6 +69,7 @@ public class SolutionSubmitter : ISolutionSubmitter
                         File.WriteAllText(filename, JsonConvert.SerializeObject(bestScoreItem));
 
                         Console.WriteLine($"GameScore: {score.GameScore!.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}. Skipped {submitList.Count - 1} items int submit list.");
+                        // Console.WriteLine($"ServerScore: {serverScore.GameScore!.Total} co2 {serverScore.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {serverScore.GameScore.Earnings} footfall {serverScore.GameScore.TotalFootfall}");
                     }
                     
                     bestScoreItem = null;
