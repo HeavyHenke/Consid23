@@ -32,7 +32,7 @@ public class SandboxClusterHotspotsToLocations
 
         public IEnumerable<(double lat, double lon, double points)> GetLocations()
         {
-            const int size = 1024;
+            const int size = 100;
 
             var hotSpots = _hotspots.ToList();
             while (hotSpots.Any())
@@ -86,7 +86,7 @@ public class SandboxClusterHotspotsToLocations
         
         private static (double lat, double lon, double points) OptimizePoint(double lat, double lon, double points, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel)
         {
-            const int size = 1024;
+            const int size = 100;
             var minLat = lat - 2 * latSizePerPixel;
             var maxLat = lat + 2 * latSizePerPixel;
             var minLong = lon - 2 * longSizePerPixel;
