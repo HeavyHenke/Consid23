@@ -2,10 +2,67 @@
 
 namespace Considition2023_Cs
 {
+
+    public class LocationConfiguration
+    {
+        [DebuggerDisplay("{Capacity}: {LeasingCost}   {StaticCo2}")]
+        class Configuration
+        {
+            public double Capacity;
+            public double LeasingCost;
+            public double StaticCo2;
+            public byte Freestyle3100Count;
+            public byte Freestyle9100Count;
+        }
+        private readonly int _numLocations;
+
+        public byte[] Freestyle3100Count;
+        public byte[] Freestyle9100Count;
+        public double[] Capacity;
+        public double[] LeasingCost;
+        public double[] StaticCo2;
+        
+        public LocationConfiguration(GeneralData generalData)
+        {
+            List<Configuration> configurations = new List<Configuration>();
+            for (int i = 0; i <= 2; i++)
+                for (int j = 0; j <= 2; j++)
+                {
+                    var configuration = new Configuration();
+                    configuration.Freestyle3100Count = (byte)i;
+                    configuration.Freestyle9100Count = (byte)j;
+                    configuration.Capacity = i * generalData.Freestyle3100Data.RefillCapacityPerWeek + j * generalData.Freestyle9100Data.RefillCapacityPerWeek;
+                    configuration.StaticCo2 = i * generalData.Freestyle3100Data.StaticCo2 / 1000 + j * generalData.Freestyle9100Data.StaticCo2 / 1000;
+                    configuration.LeasingCost = i * generalData.Freestyle3100Data.LeasingCostPerWeek + j * generalData.Freestyle9100Data.LeasingCostPerWeek;
+                    configurations.Add(configuration);
+                }
+
+//            configurations=configurations.OrderBy(p =>p.LeasingCost).ThenBy((p=>p.Capacity)).ToList();
+            configurations = configurations.OrderBy(p => p.StaticCo2).ThenBy((p => p.Capacity)).ToList();
+            Freestyle3100Count = configurations.Select(c => c.Freestyle3100Count).ToArray();
+            Freestyle9100Count = configurations.Select(c => c.Freestyle9100Count).ToArray();
+            Capacity = configurations.Select(c => c.Capacity).ToArray();
+            LeasingCost = configurations.Select(c => c.LeasingCost).ToArray();
+            StaticCo2 = configurations.Select(c => c.StaticCo2).ToArray();
+            _numLocations = configurations.Capacity;
+        }
+
+        public byte IndexFromDouble(double d)
+        {
+//            int index = (int)(d - .2) * _numLocations;
+            int index = (int)(d * _numLocations);
+            if (index < 0)
+                index = 0;
+            if (index >= _numLocations)
+                index = _numLocations - 1;
+            return (byte)index;
+        }
+    }
     public class DennisModel
     {
         private readonly GeneralData _generalData;
-        private readonly int _numLocations;
+        private readonly MapData _mapEntity;
+        private int _numLocations;
 
         public struct Location
         {
@@ -17,9 +74,9 @@ namespace Considition2023_Cs
             public double ScaledSalesVolume { get; set; }
         }
 
-        public readonly Location[] Locations;
+        public Location[] Locations;
 
-        public readonly List<(int index, double distanceScaleFactor)>[] Neighbours;
+        public List<(int index, double distanceScaleFactor)>[] Neighbours;
 
         [DebuggerDisplay("{Freestyle9100Count} + {Freestyle3100Count}")]
         public struct SolutionLocation
@@ -34,7 +91,8 @@ namespace Considition2023_Cs
         }
 
         public readonly Dictionary<string, int> LocationNameToIndex = new Dictionary<string, int>();
-        public readonly string[] IndexToLocationName;
+        public string[] IndexToLocationName;
+        
 
         public SolutionLocation[] ConvertFromSubmitSolution(SubmitSolution submitSolution)
         {
@@ -67,6 +125,7 @@ namespace Considition2023_Cs
         public DennisModel(GeneralData generalData, MapData mapEntity)
         {
             _generalData = generalData;
+            _mapEntity = mapEntity;
             _numLocations = mapEntity.locations.Count;
             Locations = new Location[_numLocations];
             Neighbours = new List<(int index, double distanceScaleFactor)>[_numLocations];
@@ -109,7 +168,49 @@ namespace Considition2023_Cs
             }
         }
 
-        public double CalculateScore(SolutionLocation[] solutionLocations, double[]? salesVolume=null)
+        public SolutionLocation[] InitiateSandboxLocations(SubmitSolution submitSolution)
+        {
+            _numLocations = submitSolution.Locations.Count;
+            Locations = new Location[_numLocations];
+            Neighbours = new List<(int index, double distanceScaleFactor)>[_numLocations];
+            for (int i = 0; i < Neighbours.Length; i++)
+                Neighbours[i] = new List<(int index, double distanceScaleFactor)>();
+
+            IndexToLocationName = new string[_numLocations];
+
+            var solutionLocations = new SolutionLocation[submitSolution.Locations.Count];
+
+            var index = 0;
+            foreach (var location in submitSolution.Locations)
+            {
+                LocationNameToIndex.Add(location.Key, index);
+                IndexToLocationName[index] = location.Key;
+                Locations[index].LocationType = location.Value.LocationType;
+                Locations[index].Latitude = location.Value.Latitude;
+                Locations[index].Longitude = location.Value.Longitude;
+                
+                foreach (Hotspot hotspot in _mapEntity.Hotspots)
+                {
+                    double distanceInMeters = Scoring.DistanceBetweenPoint(hotspot.Latitude, hotspot.Longitude, Locations[index].Latitude, Locations[index].Longitude);
+                    double maxSpread = hotspot.Spread;
+                    if (distanceInMeters <= maxSpread)
+                    {
+                        double val = hotspot.Footfall * (1 - (distanceInMeters / maxSpread));
+                        Locations[index].Footfall += val / 10;
+                    }
+                }
+                
+                Locations[index].footfallScale = 1;// location.Value.footfallScale;
+                Locations[index].ScaledSalesVolume = Scoring.GetSalesVolume(location.Value.LocationType, _generalData);
+                solutionLocations[index].Freestyle3100Count = (byte)location.Value.Freestyle3100Count;
+                solutionLocations[index].Freestyle9100Count = (byte)location.Value.Freestyle9100Count;
+                index++;
+            }
+
+            CalculateNeighbours();
+            return solutionLocations;
+        }
+        public double CalculateScore(SolutionLocation[] solutionLocations, double[]? salesVolume = null,GameData gameData=null)
         {
             if (salesVolume == null)
                 salesVolume = new double[_numLocations];
@@ -156,7 +257,7 @@ namespace Considition2023_Cs
 
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
                 var sales = Math.Min(Round(salesVolume[i]), salesCapacity);
-//                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
+                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
                 totalSales += sales;
 
                 totalFreestyle3100Count += solutionLocations[i].Freestyle3100Count;

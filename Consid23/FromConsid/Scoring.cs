@@ -1,4 +1,6 @@
-﻿namespace Considition2023_Cs
+﻿using System.Diagnostics;
+
+namespace Considition2023_Cs
 {
     public interface IScoring
     {
@@ -253,7 +255,7 @@
             }
             return locations;
         }
-        private double GetSalesVolume(string locationType, GeneralData generalData)
+        public static double GetSalesVolume(string locationType, GeneralData generalData)
         {
             foreach (KeyValuePair<string, LocationType> kvpLoc in generalData.LocationTypes)
             {

@@ -1,0 +1,396 @@
+{
+  "Locations": {
+    "location49": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.69653227509117,
+      "Longitude": 11.962524574783325,
+      "LocationType": "Grocery-store-large"
+    },
+    "location33": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.645380595601274,
+      "Longitude": 11.899242133608247,
+      "LocationType": "Grocery-store"
+    },
+    "location54": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.665821950728606,
+      "Longitude": 12.01141831805725,
+      "LocationType": "Kiosk"
+    },
+    "location48": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.72445131052132,
+      "Longitude": 12.025943134418487,
+      "LocationType": "Grocery-store"
+    },
+    "location52": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.73227450458984,
+      "Longitude": 12.02386137406311,
+      "LocationType": "Grocery-store-large"
+    },
+    "location46": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.66823331220245,
+      "Longitude": 11.85353633843956,
+      "LocationType": "Grocery-store"
+    },
+    "location36": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.72355416063424,
+      "Longitude": 11.893267370478439,
+      "LocationType": "Grocery-store"
+    },
+    "location30": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.712941130348206,
+      "Longitude": 11.893182556665039,
+      "LocationType": "Grocery-store"
+    },
+    "location43": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.71951543060989,
+      "Longitude": 11.927707751704789,
+      "LocationType": "Grocery-store"
+    },
+    "location32": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.732686169238285,
+      "Longitude": 11.895217064967346,
+      "LocationType": "Grocery-store"
+    },
+    "location9": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.716334794345855,
+      "Longitude": 12.004812551299667,
+      "LocationType": "Convenience"
+    },
+    "location18": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.685334122549435,
+      "Longitude": 11.926267395892333,
+      "LocationType": "Convenience"
+    },
+    "location6": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.68898924875336,
+      "Longitude": 11.968554571990966,
+      "LocationType": "Gas-station"
+    },
+    "location39": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.72465750181275,
+      "Longitude": 12.041907447241973,
+      "LocationType": "Grocery-store"
+    },
+    "location22": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72675846877327,
+      "Longitude": 11.893443992901613,
+      "LocationType": "Convenience"
+    },
+    "location47": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.68127658117943,
+      "Longitude": 11.945670445474624,
+      "LocationType": "Grocery-store"
+    },
+    "location10": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.71621278631745,
+      "Longitude": 11.910325287359619,
+      "LocationType": "Convenience"
+    },
+    "location45": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.718398690832146,
+      "Longitude": 12.026213098464966,
+      "LocationType": "Grocery-store"
+    },
+    "location50": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.70806483781394,
+      "Longitude": 11.986176389862061,
+      "LocationType": "Grocery-store-large"
+    },
+    "location11": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.65208550214844,
+      "Longitude": 11.909689159005357,
+      "LocationType": "Convenience"
+    },
+    "location20": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.71320202835312,
+      "Longitude": 11.991298181723023,
+      "LocationType": "Convenience"
+    },
+    "location2": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.6560425696289,
+      "Longitude": 12.017556367184067,
+      "LocationType": "Gas-station"
+    },
+    "location23": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.698052418179316,
+      "Longitude": 11.994855247558593,
+      "LocationType": "Convenience"
+    },
+    "location28": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.69916865350998,
+      "Longitude": 11.9694278274286,
+      "LocationType": "Convenience"
+    },
+    "location34": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.699520895957974,
+      "Longitude": 11.944732268965911,
+      "LocationType": "Grocery-store"
+    },
+    "location37": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.6692800351448,
+      "Longitude": 11.871474717712402,
+      "LocationType": "Grocery-store"
+    },
+    "location29": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.6853055306591,
+      "Longitude": 11.964228715133284,
+      "LocationType": "Grocery-store"
+    },
+    "location14": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.70044341094752,
+      "Longitude": 11.974195165356827,
+      "LocationType": "Convenience"
+    },
+    "location25": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.697720373528284,
+      "Longitude": 11.979763222911835,
+      "LocationType": "Convenience"
+    },
+    "location3": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.70704185521011,
+      "Longitude": 11.967893236573792,
+      "LocationType": "Gas-station"
+    },
+    "location41": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.718122444921875,
+      "Longitude": 12.019440435505677,
+      "LocationType": "Grocery-store"
+    },
+    "location17": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.67238603554687,
+      "Longitude": 11.92781923607483,
+      "LocationType": "Convenience"
+    },
+    "location19": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.67831419201889,
+      "Longitude": 12.004139515400697,
+      "LocationType": "Convenience"
+    },
+    "location26": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.71078110466919,
+      "Longitude": 12.023525101124573,
+      "LocationType": "Convenience"
+    },
+    "location51": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.70410469132919,
+      "Longitude": 11.969695754463958,
+      "LocationType": "Grocery-store-large"
+    },
+    "location7": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72245659648438,
+      "Longitude": 12.04777241965866,
+      "LocationType": "Gas-station"
+    },
+    "location27": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.675405267992396,
+      "Longitude": 12.00787094811783,
+      "LocationType": "Convenience"
+    },
+    "location13": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72062915402718,
+      "Longitude": 11.935594090382384,
+      "LocationType": "Convenience"
+    },
+    "location12": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.69012390908203,
+      "Longitude": 11.952133916557282,
+      "LocationType": "Convenience"
+    },
+    "location38": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.696828344607546,
+      "Longitude": 11.986830868078053,
+      "LocationType": "Grocery-store"
+    },
+    "location42": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.67181469068337,
+      "Longitude": 12.01003777018738,
+      "LocationType": "Grocery-store"
+    },
+    "location16": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72075197735519,
+      "Longitude": 11.953399122665786,
+      "LocationType": "Convenience"
+    },
+    "location15": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.68055467314453,
+      "Longitude": 11.901767712160494,
+      "LocationType": "Convenience"
+    },
+    "location56": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72923202497101,
+      "Longitude": 12.013721240381622,
+      "LocationType": "Kiosk"
+    },
+    "location24": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.702822770359795,
+      "Longitude": 11.96448921133728,
+      "LocationType": "Convenience"
+    },
+    "location40": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.70573737246094,
+      "Longitude": 11.957535466234587,
+      "LocationType": "Grocery-store"
+    },
+    "location21": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72057161776123,
+      "Longitude": 11.945145110925292,
+      "LocationType": "Convenience"
+    },
+    "location5": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.674336259621434,
+      "Longitude": 11.935986607666397,
+      "LocationType": "Gas-station"
+    },
+    "location8": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.700003371849064,
+      "Longitude": 11.95294725627289,
+      "LocationType": "Gas-station"
+    },
+    "location31": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.674299512117,
+      "Longitude": 11.88258085806961,
+      "LocationType": "Grocery-store"
+    },
+    "location35": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.6614523129242,
+      "Longitude": 12.013670105635072,
+      "LocationType": "Grocery-store"
+    },
+    "location1": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.709221892709344,
+      "Longitude": 11.973240797007751,
+      "LocationType": "Gas-station"
+    },
+    "location44": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.66774748911934,
+      "Longitude": 11.861004523266601,
+      "LocationType": "Grocery-store"
+    },
+    "location53": {
+      "Freestyle9100Count": 1,
+      "Freestyle3100Count": 0,
+      "Latitude": 57.69329471280518,
+      "Longitude": 11.973358063586806,
+      "LocationType": "Grocery-store-large"
+    },
+    "location55": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.72015361997222,
+      "Longitude": 11.893105538597107,
+      "LocationType": "Kiosk"
+    },
+    "location4": {
+      "Freestyle9100Count": 0,
+      "Freestyle3100Count": 1,
+      "Latitude": 57.727613360406494,
+      "Longitude": 12.005004556997681,
+      "LocationType": "Gas-station"
+    }
+  }
+}
