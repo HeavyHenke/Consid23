@@ -1,4 +1,5 @@
-﻿using Considition2023_Cs;
+﻿using System.Drawing;
+using Considition2023_Cs;
 
 namespace Consid23;
 
@@ -83,7 +84,37 @@ public class SandboxClusterHotspotsToLocations
                 }
             }
         }
-        
+
+        private static void SaveAsBitmap(int size, double[,] points)
+        {
+            var bitmap = new Bitmap(size, size);
+            double min = 10000;
+            double max = -1;
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                min = Math.Min(min, points[y, x]);
+                max = Math.Max(max, points[y, x]);
+            }
+
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                var val = (points[y, x] - min) / (max - min);
+                if (val != 0)
+                {
+                    int rgb = (int)(val * 255);
+                    bitmap.SetPixel(x, size - y - 1, Color.FromArgb(rgb, rgb, rgb));
+                }
+                else
+                {
+                    bitmap.SetPixel(x, size - y - 1, Color.FromArgb(255, 0, 0));
+                }
+            }
+
+            bitmap.Save(@"c:\temp\bilden.bmp");
+        }
+
         private static (double lat, double lon, double points) OptimizePoint(double lat, double lon, double points, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel)
         {
             const int size = 100;
