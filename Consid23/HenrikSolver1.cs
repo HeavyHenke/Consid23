@@ -275,18 +275,14 @@ public class HenrikSolver1
                 LocationType = _mapData.locations[location].LocationType
             });
         }
-        else if (loc.Freestyle3100Count == 0)
+        else if (loc.Freestyle3100Count < 2)
         {
             loc.Freestyle3100Count++;
         }
         else if(loc.Freestyle9100Count < 2)
         {
-            loc.Freestyle3100Count--;
+            loc.Freestyle3100Count -= 2;
             loc.Freestyle9100Count++;
-        }
-        else if (loc.Freestyle9100Count < 2)
-        {
-            loc.Freestyle3100Count++;
         }
     }
 
@@ -304,7 +300,7 @@ public class HenrikSolver1
         else if(loc.Freestyle9100Count > 0)
         {
             loc.Freestyle9100Count--;
-            loc.Freestyle3100Count++;
+            loc.Freestyle3100Count += 2;
         }
 
         if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })

@@ -5,6 +5,8 @@ namespace Consid23;
 
 public class SandboxEngine
 {
+    private GeneralData _generalData;
+
     public async Task Run(string apikey)
     {
         var mapName = MapNames.GSandbox;
@@ -12,7 +14,7 @@ public class SandboxEngine
         HttpClient client = new();
         Api api = new(client);
         MapData mapData = await api.GetMapDataAsync(mapName, apikey);
-        GeneralData generalData = await api.GetGeneralDataAsync();
+        _generalData = await api.GetGeneralDataAsync();
 
         object lck = new object();
         double best = -100000;
@@ -22,18 +24,18 @@ public class SandboxEngine
         var sw = Stopwatch.StartNew();
 
 
-        var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(generalData);
+        var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(_generalData);
         var clustered = sandboxClusterHotspotsToLocations.ClusterHotspots(mapData);
-        ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, clustered);
+        ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, _generalData, clustered);
 
-        Parallel.For(1, 11, DoWorkInOneThread);
+        Parallel.For(1, 2, DoWorkInOneThread);
 
         sw.Stop();
 
         submitter.Dispose();
         Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
-        var localScore = new ScoringHenrik(generalData, clustered).CalculateScore(bestSol);
+        var localScore = new Scoring(_generalData, clustered).CalculateScore(bestSol);
 
         Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
  // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
@@ -47,17 +49,16 @@ public class SandboxEngine
             var localMapData = clustered.Clone();
             localMapData.RandomizeLocationOrder(ix);
 
-            var lastSol = new HenrikSolver1(generalData, localMapData, submitter).CalcSolution();
-
-            // sandboxClusterHotspotsToLocations.OptimizeByMovingALittle(lastSol, localMapData);
-
+            var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();
+            EmptyAndMoveKiosks(lastSol);
+            
             var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
             if (validation != null)
             {
                 Console.WriteLine("Error: " + validation);
             }
             
-            var score = new Scoring(generalData, localMapData).CalculateScore(lastSol);
+            var score = new Scoring(_generalData, localMapData).CalculateScore(lastSol);
             var score2 = score.GameScore!.Total;
 
             lock (lck)
@@ -70,6 +71,27 @@ public class SandboxEngine
             }
 
             Console.WriteLine($"Best score found: {score2}");
+        }
+    }
+
+    private void EmptyAndMoveKiosks(SubmitSolution lastSol)
+    {
+        var locationTypeToKey = _generalData.LocationTypes.ToDictionary(key => key.Value.Type, val => val.Key);
+            
+        var locationsBySalesOverhead = lastSol.Locations
+            .Where(l => l.Value.LocationType == "Kiosk")
+            .OrderByDescending(l => _generalData.LocationTypes[locationTypeToKey[l.Value.LocationType]].SalesVolume - l.Value.Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek - l.Value.Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek)
+            .ToList();
+        var fillLoc = 0;
+            
+        foreach (var k in lastSol.Locations.Where(l => l.Value.LocationType == "Kiosk"))
+        {
+            k.Value.Freestyle3100Count = 0;
+            k.Value.Freestyle9100Count = 0;
+
+            k.Value.Latitude = locationsBySalesOverhead[fillLoc].Value.Latitude;
+            k.Value.Longitude = locationsBySalesOverhead[fillLoc].Value.Longitude;
+            fillLoc++;
         }
     }
 }
