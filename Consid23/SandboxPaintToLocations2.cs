@@ -208,9 +208,12 @@ file class HeatMap
     private readonly double _minLat;
     private readonly double _maxLat;
     private readonly double[,] _map;
+    private readonly double _latToIndexFactor;
+    private readonly double _longToIndexFactor;
 
     public double LatPerPixel => _latPerIx;
     public double LongPerPixel => _longPerIx;
+
     
     public HeatMap(int size, double minLong, double maxLong, double minLat, double maxLat)
     {
@@ -225,6 +228,9 @@ file class HeatMap
         _longPerIx = (maxLong - minLong) / _size;
         _meterPerLatIx = Helper.DistanceBetweenPointDouble(minLat, (minLong + maxLong) / 2, maxLat, (minLong + maxLong) / 2) / _size;
         _meterPerLongIx = Helper.DistanceBetweenPointDouble((minLat + maxLat) / 2, minLong, (minLat + maxLat) / 2, maxLong) / _size;
+
+        _latToIndexFactor = _size / (_maxLat - _minLat);
+        _longToIndexFactor = _size / (_maxLong - _minLong);
     }
 
     public void AddHotspot(Hotspot h)
@@ -239,8 +245,8 @@ file class HeatMap
     
     private void AddHotspotWithFactor(Hotspot h, bool neg)
     {
-        var centerLatIx = (int)((h.Latitude - _minLat) / (_maxLat - _minLat) * _size);
-        var centerLongIx = (int)((h.Longitude - _minLong) / (_maxLong - _minLong) * _size);
+        var centerLatIx = (int)((h.Latitude - _minLat) * _latToIndexFactor);
+        var centerLongIx = (int)((h.Longitude - _minLong) * _longToIndexFactor);
         var latSize = (int)(h.Spread / _meterPerLatIx);
         var longSize = (int)(h.Spread / _meterPerLongIx);
 
@@ -248,21 +254,24 @@ file class HeatMap
         var startY = Math.Max(0, centerLongIx - longSize);
         var stopX = Math.Min(_size - 1, centerLatIx + latSize);
         var stopY = Math.Min(_size - 1, centerLongIx + longSize);
-        
+
         for (int x = startX; x < stopX; x++)
-        for (int y = startY; y < stopY; y++)
         {
             var latDist = (x - centerLatIx) * _meterPerLatIx;
-            var longDist = (y - centerLongIx) * _meterPerLongIx;
-            var dist = (int)(Math.Sqrt(latDist * latDist + longDist * longDist));
-            var footFall = GetFootFall(h, dist);
-            if (footFall < 0)
-                continue;
-            
-            if(!neg)
-                _map[x, y] += footFall;
-            else
-                _map[x, y] -= footFall;
+            var latDistSquare = latDist * latDist;
+            for (int y = startY; y < stopY; y++)
+            {
+                var longDist = (y - centerLongIx) * _meterPerLongIx;
+                var dist = (int)(Math.Sqrt(latDistSquare + longDist * longDist));
+                var footFall = GetFootFall(h, dist);
+                if (footFall < 0)
+                    continue;
+
+                if (!neg)
+                    _map[x, y] += footFall;
+                else
+                    _map[x, y] -= footFall;
+            }
         }
     }
 
