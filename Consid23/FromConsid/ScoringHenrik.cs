@@ -231,7 +231,7 @@ public class ScoringHenrik : IScoring
 
         public Dictionary<string, StoreLocationScoring> CalcualteFootfall(Dictionary<string, StoreLocationScoring> locations)
         {
-            double maxFootfall = 0;
+            //double maxFootfall = 0;
             foreach (KeyValuePair<string, StoreLocationScoring> kvpLoc in locations)
             {
                 foreach (Hotspot hotspot in _mapEntity.Hotspots)
@@ -246,25 +246,25 @@ public class ScoringHenrik : IScoring
                         kvpLoc.Value.Footfall += val / 10;
                     }
                 }
-                if (maxFootfall < kvpLoc.Value.Footfall)
-                {
-                    maxFootfall = kvpLoc.Value.Footfall;
-                }
+                // if (maxFootfall < kvpLoc.Value.Footfall)
+                // {
+                //     maxFootfall = kvpLoc.Value.Footfall;
+                // }
             }
-            if (maxFootfall > 0)
-            {
-                foreach (KeyValuePair<string, StoreLocationScoring> kvpLoc in locations)
-                {
-                    if (kvpLoc.Value.Footfall > 0)
-                    {
-                        kvpLoc.Value.FootfallScale = Convert.ToInt32(kvpLoc.Value.Footfall / maxFootfall * 10);
-                        if (kvpLoc.Value.FootfallScale == 0)
-                        {
-                            kvpLoc.Value.FootfallScale = 1;
-                        }
-                    }
-                }
-            }
+            // if (maxFootfall > 0)
+            // {
+            //     foreach (KeyValuePair<string, StoreLocationScoring> kvpLoc in locations)
+            //     {
+            //         if (kvpLoc.Value.Footfall > 0)
+            //         {
+            //             kvpLoc.Value.FootfallScale = Convert.ToInt32(kvpLoc.Value.Footfall / maxFootfall * 10);
+            //             if (kvpLoc.Value.FootfallScale == 0)
+            //             {
+            //                 kvpLoc.Value.FootfallScale = 1;
+            //             }
+            //         }
+            //     }
+            // }
             return locations;
         }
         private double GetSalesVolume(string locationType, GeneralData generalData)
