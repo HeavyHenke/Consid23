@@ -24,7 +24,8 @@ public class SandboxEngine
         var sw = Stopwatch.StartNew();
 
 
-        var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(_generalData);
+        // var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(_generalData);
+        var sandboxClusterHotspotsToLocations = new SandboxPaintToLocations2(_generalData);
         var clustered = sandboxClusterHotspotsToLocations.ClusterHotspots(mapData);
         ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, _generalData, clustered);
 
