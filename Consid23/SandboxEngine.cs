@@ -49,7 +49,10 @@ public class SandboxEngine
             var localMapData = clustered.Clone();
             localMapData.RandomizeLocationOrder(ix);
 
-            var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();
+            //var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();
+
+            var initial = new HenrikDennisStaticInitialStateCreator(null, null).CreateInitialSolution();
+            var lastSol = new HenrikDennisOptimizer2Gradient(null, null).OptimizeSolution(initial);
             EmptyAndMoveKiosks(lastSol);
             
             var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
