@@ -7,6 +7,7 @@ public class SandboxPaintToLocations2
 {
     private readonly GeneralData _generalData;
     private const int HeatMapSize = 2048;
+    private const int OptimizationSize = 100;
 
     public SandboxPaintToLocations2(GeneralData generalData)
     {
@@ -100,13 +101,12 @@ public class SandboxPaintToLocations2
     
     private static (double lat, double lon, double points) OptimizePoint(double lat, double lon, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel)
     {
-        const int size = 100;
         var minLat = lat - 2 * latSizePerPixel;
         var maxLat = lat + 2 * latSizePerPixel;
         var minLong = lon - 2 * longSizePerPixel;
         var maxLong = lon + 2 * longSizePerPixel;
 
-        var heatMap = new HeatMap(size, minLong, maxLong, minLat, maxLat);
+        var heatMap = new HeatMap(OptimizationSize, minLong, maxLong, minLat, maxLat);
         foreach(var hs in hotspots)
             heatMap.AddHotspot(hs);
 
@@ -152,8 +152,6 @@ public class SandboxPaintToLocations2
                 md.Hotspots.RemoveAt(i);
         }
     }
-   
-
 }
 
 internal static class Helper
@@ -269,22 +267,23 @@ file class HeatMap
 
     public (double lat, double lon, double points) GetMaxPos()
     {
-        double maxLat = -1;
-        double maxLong = -1;
+        int maxLatIx = -1;
+        int maxLongIx = -1;
         double maxPoints = double.MinValue;
         
         for (int y = 0; y < _size; y++)
         for (int x = 0; x < _size; x++)
         {
-            if (_map[x, y] > maxPoints)
+            var points = _map[x, y];
+            if (points > maxPoints)
             {
-                maxPoints = _map[x, y];
-                maxLat = _minLat + x * _latPerIx;
-                maxLong = _minLong + y * _longPerIx;
+                maxPoints = points;
+                maxLatIx = x;
+                maxLongIx = y;
             }
         }
 
-        return (maxLat, maxLong, maxPoints);
+        return (_minLat + maxLatIx * _latPerIx, _minLong + maxLongIx * _longPerIx, maxPoints);
     }
     
     private static double GetFootFall(Hotspot hs, int distanceInMeters)
