@@ -5,7 +5,7 @@ namespace Consid23;
 
 public class ConsoleOnlySubmitter : ISolutionSubmitter
 {
-    private readonly Scoring _scorer;
+    private readonly IScoring _scorer;
     private readonly GeneralData _generalData;
     private readonly MapData _mapData;
 
@@ -15,9 +15,9 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
     {
         _mapData = mapData;
         _generalData = generalData;
-        _scorer = new Scoring(generalData, mapData);
+        _scorer = new ScoringHenrik(generalData, mapData);
     }
-    
+
     public void AddSolutionToSubmit(SubmitSolution sol)
     {
         var score = _scorer.CalculateScore(sol);

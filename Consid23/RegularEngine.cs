@@ -30,7 +30,7 @@ public class RegularEngine
         submitter.Dispose();
         Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
-        var localScore = new ScoringHenrik(generalData, mapData).CalculateScore(bestSol);
+        var localScore = new Scoring(generalData, mapData).CalculateScore(bestSol);
 
  // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
  // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
