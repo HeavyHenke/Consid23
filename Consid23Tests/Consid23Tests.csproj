@@ -29,6 +29,9 @@
       <None Update="g-sandbox.cached.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="g-sandbox_3348,35_17_06_30_54.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>
