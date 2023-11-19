@@ -249,8 +249,8 @@ file class HeatMap
         var stopX = Math.Min(_size - 1, centerLatIx + latSize);
         var stopY = Math.Min(_size - 1, centerLongIx + longSize);
         
-        for (int y = startY; y < stopY; y++)
         for (int x = startX; x < stopX; x++)
+        for (int y = startY; y < stopY; y++)
         {
             var latDist = (x - centerLatIx) * _meterPerLatIx;
             var longDist = (y - centerLongIx) * _meterPerLongIx;
@@ -272,8 +272,8 @@ file class HeatMap
         int maxLongIx = -1;
         double maxPoints = double.MinValue;
         
-        for (int y = 0; y < _size; y++)
         for (int x = 0; x < _size; x++)
+        for (int y = 0; y < _size; y++)
         {
             var points = _map[x, y];
             if (points > maxPoints)
@@ -292,12 +292,12 @@ file class HeatMap
         ConcurrentQueue<(int lat, int lon, double points)> maxPerRowQueue = new();
 
         Parallel.For(0, _size,
-            y =>
+            x =>
             {
                 int maxLatIx = -1;
                 int maxLongIx = -1;
                 double maxPoints = double.MinValue;
-                for (int x = 0; x < _size; x++)
+                for (int y = 0; y < _size; y++)
                 {
                     var points = _map[x, y];
                     if (points > maxPoints)
@@ -339,15 +339,15 @@ file class HeatMap
         var bitmap = new Bitmap(_size, _size);
         double min = 10000;
         double max = -1;
-        for (int y = 0; y < _size; y++)
         for (int x = 0; x < _size; x++)
+        for (int y = 0; y < _size; y++)
         {
             min = Math.Min(min, _map[y, x]);
             max = Math.Max(max, _map[y, x]);
         }
 
-        for (int y = 0; y < _size; y++)
         for (int x = 0; x < _size; x++)
+        for (int y = 0; y < _size; y++)
         {
             if (_map[y, x] > 0)
             {
