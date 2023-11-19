@@ -50,12 +50,13 @@ public class SandboxEngine
             var localMapData = clustered.Clone();
             localMapData.RandomizeLocationOrder(ix);
 
-            //var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();
-
-            var initial = new HenrikDennisStaticInitialStateCreator(null, null).CreateInitialSolution();
-            var lastSol = new HenrikDennisOptimizer2Gradient(null, null).OptimizeSolution(initial);
+//            var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();
+            var model = new DennisModel(_generalData, localMapData);
+            var initial = new HenrikDennisStaticInitialStateCreator(model, _generalData).CreateInitialSolution();
+            model.InitiateSandboxLocations(initial);
+            var lastSol = new HenrikDennisOptimizer2Gradient(model,submitter) .OptimizeSolution(initial);
             EmptyAndMoveKiosks(lastSol);
-            
+
             var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
             if (validation != null)
             {

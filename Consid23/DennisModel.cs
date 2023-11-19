@@ -116,7 +116,7 @@ namespace Considition2023_Cs
             for (var i = 0; i < _numLocations; i++)
             {
                 if (solutionLocations[i].Freestyle3100Count != 0 || solutionLocations[i].Freestyle9100Count != 0)
-                    sol.Locations.Add(IndexToLocationName[i], new PlacedLocations { Freestyle3100Count = solutionLocations[i].Freestyle3100Count, Freestyle9100Count = solutionLocations[i].Freestyle9100Count });
+                    sol.Locations.Add(IndexToLocationName[i], new PlacedLocations { Freestyle3100Count = solutionLocations[i].Freestyle3100Count, Freestyle9100Count = solutionLocations[i].Freestyle9100Count, LocationType = Locations[i].LocationType, Latitude = Locations[i].Latitude, Longitude = Locations[i].Longitude});
             }
 
             return sol;
@@ -177,7 +177,7 @@ namespace Considition2023_Cs
                 Neighbours[i] = new List<(int index, double distanceScaleFactor)>();
 
             IndexToLocationName = new string[_numLocations];
-
+            LocationNameToIndex.Clear();
             var solutionLocations = new SolutionLocation[submitSolution.Locations.Count];
 
             var index = 0;
@@ -257,7 +257,7 @@ namespace Considition2023_Cs
 
                 var salesCapacity = solutionLocations[i].Freestyle3100Count * _generalData.Freestyle3100Data.RefillCapacityPerWeek + solutionLocations[i].Freestyle9100Count * _generalData.Freestyle9100Data.RefillCapacityPerWeek;
                 var sales = Math.Min(Round(salesVolume[i]), salesCapacity);
-                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
+//                Trace.WriteLine($"Location: {IndexToLocationName[i]} sales {salesVolume[i]}");
                 totalSales += sales;
 
                 totalFreestyle3100Count += solutionLocations[i].Freestyle3100Count;
