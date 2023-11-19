@@ -50,5 +50,17 @@ public class SandboxModeTests
         var clustered = sandboxEngine.ClusterHotspots(mapData);
 
         Assert.AreEqual(56, clustered.locations.Count);
+
+
+        var dennisModel = new DennisModel(generalData, clustered);
+        var initial = new HenrikDennisStaticInitialStateCreator(dennisModel, generalData).CreateInitialSolution();
+        dennisModel.InitiateSandboxLocations(initial);
+        
+        var lastSol = new HenrikDennisOptimizer2Gradient(dennisModel, new DummySubmitter()) .OptimizeSolution(initial);
+
+        var localScore = new ScoringHenrik(generalData, clustered).CalculateScore(lastSol);
+        
+        Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings}");
+
     }
 }
