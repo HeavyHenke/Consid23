@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Concurrent;
+using System.Drawing;
 using Considition2023_Cs;
 
 namespace Consid23;
@@ -265,7 +266,7 @@ file class HeatMap
         }
     }
 
-    public (double lat, double lon, double points) GetMaxPos()
+    public (double lat, double lon, double points) GetMaxPosNonParallel()
     {
         int maxLatIx = -1;
         int maxLongIx = -1;
@@ -280,6 +281,47 @@ file class HeatMap
                 maxPoints = points;
                 maxLatIx = x;
                 maxLongIx = y;
+            }
+        }
+
+        return (_minLat + maxLatIx * _latPerIx, _minLong + maxLongIx * _longPerIx, maxPoints);
+    }
+    
+    public (double lat, double lon, double points) GetMaxPos()
+    {
+        ConcurrentQueue<(int lat, int lon, double points)> maxPerRowQueue = new();
+
+        Parallel.For(0, _size,
+            y =>
+            {
+                int maxLatIx = -1;
+                int maxLongIx = -1;
+                double maxPoints = double.MinValue;
+                for (int x = 0; x < _size; x++)
+                {
+                    var points = _map[x, y];
+                    if (points > maxPoints)
+                    {
+                        maxPoints = points;
+                        maxLatIx = x;
+                        maxLongIx = y;
+                    }
+                }
+
+                maxPerRowQueue.Enqueue((maxLatIx, maxLongIx, maxPoints));
+            }
+        );
+
+        int maxLatIx = -1;
+        int maxLongIx = -1;
+        double maxPoints = double.MinValue;
+        foreach (var row in maxPerRowQueue.ToArray())
+        {
+            if (row.points > maxPoints)
+            {
+                maxPoints = row.points;
+                maxLatIx = row.lat;
+                maxLongIx = row.lon;
             }
         }
 
