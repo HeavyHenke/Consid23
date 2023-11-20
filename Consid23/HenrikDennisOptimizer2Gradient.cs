@@ -1,4 +1,5 @@
-﻿using Considition2023_Cs;
+﻿using System.Runtime.CompilerServices;
+using Considition2023_Cs;
 
 namespace Consid23;
 
@@ -7,13 +8,10 @@ public class HenrikDennisOptimizer2Gradient
     private readonly DennisModel _model;
     private readonly ISolutionSubmitter _solutionSubmitter;
 
-    private readonly double[] _salesVolume;
-    
     public HenrikDennisOptimizer2Gradient(DennisModel model, ISolutionSubmitter submitter)
     {
         _model = model;
         _solutionSubmitter = submitter;
-        _salesVolume = new double[model.Locations.Length];
     }
 
     public SubmitSolution OptimizeSolution(SubmitSolution submitSolution)
@@ -21,7 +19,7 @@ public class HenrikDennisOptimizer2Gradient
         var sol = _model.ConvertFromSubmitSolution(submitSolution);
         _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
 
-        var currScore = _model.CalculateScore(sol, _salesVolume);
+        var currScore = _model.CalculateScore(sol);
         while (true)
         {
             // IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> optimizations = new[] { (sol, currScore, "initial") };
@@ -35,23 +33,32 @@ public class HenrikDennisOptimizer2Gradient
                 AddOneFromAll, 
             };
 
-            (DennisModel.SolutionLocation[] sol, double score, string optimizationName) latestBest = default;
-            var minScore = currScore;
-            foreach (var s in strategies)
+            var solForParallelLoop = sol;
+            var minScoreForLoop = currScore;
+            var bestPerStrategy = new (DennisModel.SolutionLocation[] sol, double score, string optimizationName)[strategies.Length];
+            Parallel.For(0, strategies.Length, i =>
             {
-                var best = s(sol, minScore).LastOrDefault();
-                if (best != default)
-                {
-                    minScore = best.score;
-                    latestBest = best;
-                }
-            }
+                bestPerStrategy[i] = strategies[i](solForParallelLoop, minScoreForLoop).LastOrDefault();
+            });
+            var latestBest = bestPerStrategy.OrderByDescending(s => s.score).FirstOrDefault();
+
+            // (DennisModel.SolutionLocation[] sol, double score, string optimizationName) latestBest = default;
+            // var minScore = currScore;
+            // foreach (var s in strategies)
+            // {
+            //     var best = s(sol, minScore).LastOrDefault();
+            //     if (best != default)
+            //     {
+            //         minScore = best.score;
+            //         latestBest = best;
+            //     }
+            // }
 
             if (latestBest != default)
             {
                 // Console.WriteLine($"Optimized using {latestBest.optimizationName}, earned {latestBest.score - currScore}");
                 currScore = latestBest.score;
-                sol = latestBest.sol!;
+                sol = latestBest.sol;
                 _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
             }
             else
@@ -64,12 +71,13 @@ public class HenrikDennisOptimizer2Gradient
     private IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> RemoveOneFromAll(DennisModel.SolutionLocation[] original, double minScore)
     {
         var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var salesVolume = new double[_model.Locations.Length];
         
         for (var i = 0; i < sol.Length; i++)
         {
             if (RemoveOne(sol, i) == false)
                 continue;
-            var postScore = _model.CalculateScore(sol, _salesVolume);
+            var postScore = _model.CalculateScore(sol, salesVolume);
 
             if (postScore > minScore)
             {
@@ -83,12 +91,13 @@ public class HenrikDennisOptimizer2Gradient
     private IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> AddOneFromAll(DennisModel.SolutionLocation[] original, double minScore)
     {
         var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var salesVolume = new double[_model.Locations.Length];
 
         for (var i = 0; i < sol.Length; i++)
         {
             if (AddOneAt(sol, i) == false)
                 continue;
-            var postScore = _model.CalculateScore(sol, _salesVolume);
+            var postScore = _model.CalculateScore(sol, salesVolume);
 
             if (postScore > minScore)
             {
@@ -102,10 +111,11 @@ public class HenrikDennisOptimizer2Gradient
     private IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> TryPlusOneAndMinusOneOnNeighbour(DennisModel.SolutionLocation[] original, double minScore)
     {
         var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var salesVolume = new double[_model.Locations.Length];
         
         for (int i = 0; i < _model.Locations.Length; i++)
         {
-            if (sol[i].Freestyle9100Count == 5 && sol[i].Freestyle3100Count == 5)
+            if (ShouldWeTryAdding(sol[i]) == false)
                 continue;
 
             var neighbours = _model.Neighbours[i];
@@ -122,7 +132,7 @@ public class HenrikDennisOptimizer2Gradient
                 if (RemoveOne(clone, aIndex) == false)
                     continue;
 
-                var score = _model.CalculateScore(clone);
+                var score = _model.CalculateScore(clone, salesVolume);
                 if (score > minScore)
                 {
                     var bestClone = (DennisModel.SolutionLocation[])clone.Clone();
@@ -138,10 +148,11 @@ public class HenrikDennisOptimizer2Gradient
     private IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> TryPlusOneAndMinusTwoOnNeighbours(DennisModel.SolutionLocation[] original, double minScore)
     {
         var sol = (DennisModel.SolutionLocation[])original.Clone();
-
+        var salesVolume = new double[_model.Locations.Length];
+        
         for (int i = 0; i < _model.Locations.Length; i++)
         {
-            if (sol[i].Freestyle9100Count == 5 && sol[i].Freestyle3100Count == 5)
+            if (ShouldWeTryAdding(sol[i]) == false)
                 continue;
 
             var neighbours = _model.Neighbours[i];
@@ -164,7 +175,7 @@ public class HenrikDennisOptimizer2Gradient
                     if (RemoveOne(clone, bIndex) == false)
                         continue;
 
-                    var score = _model.CalculateScore(clone);
+                    var score = _model.CalculateScore(clone, salesVolume);
                     if (score > minScore)
                     {
                         var bestClone = (DennisModel.SolutionLocation[])clone.Clone();
@@ -184,10 +195,11 @@ public class HenrikDennisOptimizer2Gradient
     private IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> TryPlusOneAndMinusThreeOnNeighbours(DennisModel.SolutionLocation[] original, double minScore)
     {
         var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var salesVolume = new double[_model.Locations.Length];
         
         for (int i = 0; i < _model.Locations.Length; i++)
         {
-            if (sol[i].Freestyle9100Count == 5 && sol[i].Freestyle3100Count == 5)
+            if (ShouldWeTryAdding(sol[i]) == false)
                 continue;
 
             var neighbours = _model.Neighbours[i];
@@ -216,7 +228,7 @@ public class HenrikDennisOptimizer2Gradient
                         if(RemoveOne(clone, cIndex) == false)
                             continue;
                         
-                        var score = _model.CalculateScore(clone);
+                        var score = _model.CalculateScore(clone, salesVolume);
                         if (score > minScore)
                         {
                             var bestClone = (DennisModel.SolutionLocation[])clone.Clone();
@@ -257,6 +269,10 @@ public class HenrikDennisOptimizer2Gradient
     private static bool AddOneAt(DennisModel.SolutionLocation[] sol, int index)
     {
         var loc = sol[index];
+
+        if (ShouldWeTryAdding(sol[index]) == false)
+            return false;
+        
         if (loc.Freestyle3100Count < 2)
         {
             sol[index].Freestyle3100Count++;
@@ -269,6 +285,12 @@ public class HenrikDennisOptimizer2Gradient
             return true;
         }
         return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool ShouldWeTryAdding(DennisModel.SolutionLocation sol)
+    {
+        return sol.Freestyle9100Count == 0;
     }
    
 }

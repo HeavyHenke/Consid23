@@ -91,10 +91,10 @@ public class HenrikDennisSolver1GöteborgTests
         var generalDataJson = File.ReadAllText("Cached_general.json");
         var generalData = JsonConvert.DeserializeObject<GeneralData>(generalDataJson)!;
 
-        var startPoint = new HenrikSolver1(generalData, mapData, new DummySubmitter()).CreateStartPointByAddOneAt();
+        var model = new DennisModel(generalData, mapData);
         
-        var solver = new HenrikDennisSolver1(generalData, mapData, new DummySubmitter());
-        var solution = solver.OptimizeSolution(startPoint);
+        var startPoint = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
+        var solution = new HenrikDennisOptimizer2Gradient(model, new DummySubmitter()).OptimizeSolution(startPoint);
 
         var scorer = new Scoring(generalData, mapData);
         var score = scorer.CalculateScore(solution);

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Considition2023_Cs
 {
@@ -210,6 +211,8 @@ namespace Considition2023_Cs
             CalculateNeighbours();
             return solutionLocations;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public double CalculateScore(SolutionLocation[] solutionLocations, double[]? salesVolume = null,GameData gameData=null)
         {
             if (salesVolume == null)
