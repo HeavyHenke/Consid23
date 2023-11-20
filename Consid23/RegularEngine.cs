@@ -45,13 +45,21 @@ public class RegularEngine
         {
             var localMapData = mapData.Clone();
             localMapData.RandomizeLocationOrder(ix+2100);
-            var model = new DennisModel(generalData, localMapData);
 
+            var model = new DennisModel(generalData, localMapData);
             var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
 
-            //var solver = new HenrikDennisSolver1(generalData, localMapData, submitter);
-            var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
-            var solution = solver.OptimizeSolution(startPoint1);
+            SubmitSolution solution;
+            if ((ix & 7) == 0)  // HenrikDennisSolver1 sometimes since it is solver
+            {
+                var solver = new HenrikDennisSolver1(model, submitter);
+                solution = solver.OptimizeSolution(startPoint1);
+            }
+            else
+            {
+                var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
+                solution = solver.OptimizeSolution(startPoint1);
+            }
 
             var score = new Scoring(generalData, localMapData).CalculateScore(solution);
             var score2 = score.GameScore!.Total;
