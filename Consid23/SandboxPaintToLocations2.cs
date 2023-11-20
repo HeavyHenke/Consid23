@@ -75,7 +75,6 @@ public class SandboxPaintToLocations2
                 if (dist < hs.Spread)
                 {
                     hotSpotsLeft.RemoveAt(i);
-                    heatMap.RemoveHotspot(hs);
                     usedHotspots.Add(hs);
                 }
             }
@@ -93,6 +92,9 @@ public class SandboxPaintToLocations2
                 Footfall = optimized.points
             });
             locationIx++;
+
+            foreach (var hs in usedHotspots)
+                heatMap.RemoveHotspot(hs, optimized.lat, optimized.lon);
 
             // heatMap.SaveAsBitmap($@"c:\temp\newImage_{locationName}.bmp");
         }
@@ -238,9 +240,41 @@ file class HeatMap
         AddHotspotWithFactor(h, false);
     }
 
-    public void RemoveHotspot(Hotspot h)
+    public void RemoveHotspot(Hotspot h, double placedStoreLat, double placedStoreLong)
     {
         AddHotspotWithFactor(h, true);
+        
+        // Add negative scores (and positive close to the hotspot)
+        var centerLatIx = (int)((h.Latitude - _minLat) * _latToIndexFactor);
+        var centerLongIx = (int)((h.Longitude - _minLong) * _longToIndexFactor);
+        var latSize = (int)(h.Spread / _meterPerLatIx);
+        var longSize = (int)(h.Spread / _meterPerLongIx);
+
+        var startX = Math.Max(0, centerLatIx - latSize);
+        var startY = Math.Max(0, centerLongIx - longSize);
+        var stopX = Math.Min(_size - 1, centerLatIx + latSize);
+        var stopY = Math.Min(_size - 1, centerLongIx + longSize);
+
+        var locDist = Helper.DistanceBetweenPoint(placedStoreLat, placedStoreLong, h.Latitude, h.Longitude);
+        var distanceLost = GetFootFall(h, locDist) / 2;
+
+        
+        for (int x = startX; x < stopX; x++)
+        {
+            var latDist = (x - centerLatIx) * _meterPerLatIx;
+            var latDistSquare = latDist * latDist;
+            for (int y = startY; y < stopY; y++)
+            {
+                var longDist = (y - centerLongIx) * _meterPerLongIx;
+                var dist = (int)(Math.Sqrt(latDistSquare + longDist * longDist));
+                var footFallGain = GetFootFall(h, dist) / 2;
+               
+                if (footFallGain < 0)
+                    continue;
+
+                _map[x, y] += footFallGain - distanceLost;
+            }
+        }
     }
     
     private void AddHotspotWithFactor(Hotspot h, bool neg)
