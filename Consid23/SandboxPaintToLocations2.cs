@@ -358,15 +358,21 @@ file class HeatMap
         for (int x = 0; x < _size; x++)
         for (int y = 0; y < _size; y++)
         {
-            if (_map[y, x] > 0)
+            if (Math.Abs(_map[y, x]) < 0.0000001)
             {
-                var val = (_map[y, x] - min) / (max - min);
+                bitmap.SetPixel(x, _size - y - 1, Color.FromArgb(255, 0, 0));
+            }
+            else if(_map[y,x] > 0)
+            {
+                var val = _map[y, x] / max;
                 int rgb = (int)(val * 255);
                 bitmap.SetPixel(x, _size - y - 1, Color.FromArgb(rgb, rgb, rgb));
             }
             else
             {
-                bitmap.SetPixel(x, _size - y - 1, Color.FromArgb(255, 0, 0));
+                var val = (_map[y, x] - min) / (-min);
+                int rgb = (int)(val * 255);
+                bitmap.SetPixel(x, _size - y - 1, Color.FromArgb(0, rgb, rgb));
             }
         }
 
