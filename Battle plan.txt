@@ -1,0 +1,22 @@
+6:00 PM: Stockholm (large) 1,5h datortid
+6:00 PM: Stockholm (large sandbox) 0,5h datortid
+ - Starta Stockholm på en dator med 1000 iterationer eller mer, submitta kanske en ggr per 10 sec?
+ - Starta Sandboxläget på andra datorn, analysera
+
+6:30 PM: Malmö (medium) 0,5h datortid
+ - Låt en dator jobba vidare med stockholm
+ - Den andra jobbar med Malmö
+  
+7:00 PM: Örebro (small) 0,5h datortid
+ - Låt en dator jobba vidare med stockholm
+ - Den andra jobbar med Örebro
+
+7:30 PM: London (x-large) 0,5h datortid
+ - Byt Stockholmsdatorn till London
+ - Använd en dator för analys och plocka acheivements
+
+8:00 PM: Berlin (x-large) 1h datortid
+ - Byt London-datorn till Berlin
+ - Använd en dator för analys och för att få bättre score där det behövs
+
+9:00 PM: All maps above are closed.
