@@ -268,17 +268,15 @@ public class HenrikDennisOptimizer2Gradient
     
     private static bool AddOneAt(DennisModel.SolutionLocation[] sol, int index)
     {
-        var loc = sol[index];
-
         if (ShouldWeTryAdding(sol[index]) == false)
             return false;
         
-        if (loc.Freestyle3100Count < 2)
+        if (sol[index].Freestyle3100Count < 2)
         {
             sol[index].Freestyle3100Count++;
             return true;
         }
-        if (loc.Freestyle9100Count < 2)
+        if (sol[index].Freestyle9100Count < 2)
         {
             sol[index].Freestyle3100Count = 0;
             sol[index].Freestyle9100Count++;
@@ -290,7 +288,7 @@ public class HenrikDennisOptimizer2Gradient
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool ShouldWeTryAdding(DennisModel.SolutionLocation sol)
     {
-        return sol.Freestyle9100Count == 0;
+        return sol is { Freestyle9100Count: < 2, Freestyle3100Count: < 2 };
     }
    
 }

@@ -20,9 +20,13 @@ public class HenrikSolver1
     public SubmitSolution CalcSolution()
     {
         var sol = CreateStartPointByAddOneAt();
-        _solutionSubmitter.AddSolutionToSubmit(sol);
         //_solutionSubmitter.AddSolutionToSubmit(CreateStartPointBySalesVolume());
-        
+        _solutionSubmitter.AddSolutionToSubmit(sol);
+        return CalcSolution(sol);
+    }
+    
+    public SubmitSolution CalcSolution(SubmitSolution sol)
+    {
         // Does not help :(
         //TryPlusOneAndMinusThreeOnNeighbours(scorer, ref sol);
         
@@ -303,8 +307,8 @@ public class HenrikSolver1
             loc.Freestyle3100Count += 2;
         }
 
-        if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })
-            sol.Locations.Remove(location);
+        // if (loc is { Freestyle9100Count: 0, Freestyle3100Count: 0 })
+        //     sol.Locations.Remove(location);
     }
 
     private static double ScoreDiff(GameData score1, GameData score2)

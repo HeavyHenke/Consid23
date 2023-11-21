@@ -5,15 +5,15 @@
 
 6:30 PM: Malmö (medium) 0,5h datortid
  - Låt en dator jobba vidare med stockholm
- - Den andra jobbar med Malmö
-  
+ - Den andra jobbar med Malmö + plocka acheivements
+
 7:00 PM: Örebro (small) 0,5h datortid
  - Låt en dator jobba vidare med stockholm
  - Den andra jobbar med Örebro
 
 7:30 PM: London (x-large) 0,5h datortid
  - Byt Stockholmsdatorn till London
- - Använd en dator för analys och plocka acheivements
+ - Använd en dator för sandbox (om det behövs) analys och plocka acheivements
 
 8:00 PM: Berlin (x-large) 1h datortid
  - Byt London-datorn till Berlin
