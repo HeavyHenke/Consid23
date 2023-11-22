@@ -50,8 +50,8 @@ public class SandboxEngine
         dm.InitiateSandboxLocations(bestSol);
         Console.WriteLine($"DennisModel: {dm.CalculateScore(dm.ConvertFromSubmitSolution(bestSol))}");
         
- // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
- // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings}");
+  // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
+  // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings} gameid: {submittedScore.Id}");
 
         return;
 
