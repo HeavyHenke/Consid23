@@ -93,7 +93,8 @@ namespace Considition2023_Cs
 
         public readonly Dictionary<string, int> LocationNameToIndex = new Dictionary<string, int>();
         public string[] IndexToLocationName;
-        
+        private readonly bool _isSandbox;
+
 
         public SolutionLocation[] ConvertFromSubmitSolution(SubmitSolution submitSolution)
         {
@@ -128,6 +129,7 @@ namespace Considition2023_Cs
             _generalData = generalData;
             _mapEntity = mapEntity;
             _numLocations = mapEntity.locations.Count;
+            _isSandbox = Scoring.SandBoxMaps.Contains(_mapEntity.MapName);
             Locations = new Location[_numLocations];
             Neighbours = new List<(int index, double distanceScaleFactor)>[_numLocations];
             for (int i = 0; i < Neighbours.Length; i++)
@@ -289,7 +291,11 @@ namespace Considition2023_Cs
             for (var i = 0; i < _numLocations; i++)
             {
                 if (solutionLocations[i].Freestyle3100Count == 0 && solutionLocations[i].Freestyle9100Count == 0)
+                {
+                    if (_isSandbox)
+                        totalFootfall += Locations[i].Footfall;
                     continue;
+                }
 
                 var count = 1;
                 for (int j = 0; j < Neighbours[i].Count; j++)
