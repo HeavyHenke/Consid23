@@ -105,7 +105,7 @@ public class SandboxPaintToLocations2
             locationIx++;
 
             foreach (var hs in usedHotspots)
-                heatMap.RemoveHotspot(hs, optimized.lat, optimized.lon);
+                heatMap.RemoveHotspotWithNeg(hs, optimized.lat, optimized.lon);
 
             // heatMap.SaveAsBitmap($@"c:\temp\newImage_{locationName}.bmp");
         }
@@ -209,7 +209,7 @@ internal static class Helper
 }
 
 
-file class HeatMap
+internal class HeatMap
 {
     private readonly int _size;
     private readonly double _latPerIx;
@@ -246,12 +246,24 @@ file class HeatMap
         _longToIndexFactor = _size / (_maxLong - _minLong);
     }
 
+    public HeatMap Clone()
+    {
+        var clone = new HeatMap(_size, _minLong, _maxLong, _minLat, _maxLat);
+        Array.Copy(_map, 0, clone._map, 0, _size * _size);
+        return clone;
+    }
+    
     public void AddHotspot(Hotspot h)
     {
         AddHotspotWithFactor(h, false);
     }
 
-    public void RemoveHotspot(Hotspot h, double placedStoreLat, double placedStoreLong)
+    public void RemoveHotspot(Hotspot h)
+    {
+        AddHotspotWithFactor(h, true);
+    }
+    
+    public void RemoveHotspotWithNeg(Hotspot h, double placedStoreLat, double placedStoreLong)
     {
         AddHotspotWithFactor(h, true);
         
@@ -260,15 +272,15 @@ file class HeatMap
         var centerLongIx = (int)((h.Longitude - _minLong) * _longToIndexFactor);
         var latSize = (int)(h.Spread / _meterPerLatIx);
         var longSize = (int)(h.Spread / _meterPerLongIx);
-
+        
         var startX = Math.Max(0, centerLatIx - latSize);
         var startY = Math.Max(0, centerLongIx - longSize);
         var stopX = Math.Min(_size - 1, centerLatIx + latSize);
         var stopY = Math.Min(_size - 1, centerLongIx + longSize);
-
+        
         var locDist = Helper.DistanceBetweenPoint(placedStoreLat, placedStoreLong, h.Latitude, h.Longitude);
         var distanceLost = GetFootFall(h, locDist) / 2;
-
+        
         
         for (int x = startX; x < stopX; x++)
         {
@@ -282,7 +294,7 @@ file class HeatMap
                
                 if (footFallGain < 0)
                     continue;
-
+        
                 _map[x, y] += footFallGain - distanceLost;
             }
         }

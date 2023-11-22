@@ -36,17 +36,11 @@ public class SandboxEngine
         submitter.Dispose();
         Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
-        
-        foreach (var loc in clustered.locations)
-        {
-            clustered.locations[loc.Key].Latitude = loc.Value.Latitude;
-            clustered.locations[loc.Key].Longitude = loc.Value.Longitude;
-        }
         var localScore = new Scoring(_generalData, clustered).CalculateScore(bestSol);
 
         Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings} {localScore.Locations.Sum(l => l.Value.SalesVolume)}");
 
-        var dm = new DennisModel(_generalData, mapData);
+        var dm = new DennisModel(_generalData, clustered);
         dm.InitiateSandboxLocations(bestSol);
         Console.WriteLine($"DennisModel: {dm.CalculateScore(dm.ConvertFromSubmitSolution(bestSol))}");
         
@@ -61,19 +55,20 @@ public class SandboxEngine
             var localMapData = clustered.Clone();
             localMapData.RandomizeLocationOrder(ix);
 
-            var model = new DennisModel(_generalData, localMapData);
-            var initial = new HenrikDennisStaticInitialStateCreator(model, _generalData).CreateInitialSolution();
-            model.InitiateSandboxLocations(initial);
-            var lastSol = new HenrikDennisSolver1(model, submitter) .OptimizeSolution(initial);
+            // var model = new DennisModel(_generalData, localMapData);
+            // var initial = new HenrikDennisStaticInitialStateCreator(model, _generalData).CreateInitialSolution();
+            // model.InitiateSandboxLocations(initial);
+            // var lastSol = new HenrikDennisSolver1(model, submitter).OptimizeSolution(initial);
 
-            EmptyAndMoveKiosks(lastSol, localMapData.Border);
-            foreach (var loc in lastSol.Locations)
-            {
-                localMapData.locations[loc.Key].Latitude = loc.Value.Latitude;
-                localMapData.locations[loc.Key].Longitude = loc.Value.Longitude;
-            }
+            // EmptyAndMoveKiosks(lastSol, localMapData.Border);
+            // foreach (var loc in lastSol.Locations)
+            // {
+            //     localMapData.locations[loc.Key].Latitude = loc.Value.Latitude;
+            //     localMapData.locations[loc.Key].Longitude = loc.Value.Longitude;
+            // }
 
-            // lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution(lastSol);
+            var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();  
+            // EmptyAndMoveKiosks(lastSol, localMapData.Border);
 
             var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
             if (validation != null) Console.WriteLine("Error: " + validation);
