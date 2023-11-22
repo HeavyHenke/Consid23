@@ -288,7 +288,7 @@ public class HenrikDennisOptimizer2Gradient
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool ShouldWeTryAdding(DennisModel.SolutionLocation sol)
     {
-        return sol is { Freestyle9100Count: < 2, Freestyle3100Count: < 2 };
+        return sol.Freestyle9100Count < 2 || sol.Freestyle3100Count < 2;
     }
    
 }
