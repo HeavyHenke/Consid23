@@ -65,7 +65,7 @@ public class SandboxPaintToLocations6ValueLessHotspots
         
         while (storeLocations.Count < locationTypes.Count)
         {
-            var maxPos = heatMap.GetMaxPos(locationTypes.Count - storeLocations.Count);
+            var maxPos = heatMap.GetMaxPos(storeLocations, _generalData.WillingnessToTravelInMeters);
 
             var usedHotspots = new List<Hotspot>();
             for (var i = hotSpotsLeft.Count - 1; i >= 0; i--)
@@ -108,7 +108,7 @@ public class SandboxPaintToLocations6ValueLessHotspots
             foreach (var hs in usedHotspots)
                 heatMap.RemoveHotspotWithNeg(hs, optimized.lat, optimized.lon);
 
-            heatMap.RemoveDist(optimized.lat, optimized.lon, _generalData.WillingnessToTravelInMeters*1.1);
+            heatMap.RemoveDist(optimized.lat, optimized.lon, _generalData.WillingnessToTravelInMeters);
             heatMap.SaveAsBitmap($@"c:\temp\2 delete\newImage_{locationName}.bmp");
         }
 
@@ -352,61 +352,50 @@ internal class HeatMapWithNumHotspots
         return (_minLat + maxLatIx * _latPerIx, _minLong + maxLongIx * _longPerIx, maxPoints);
     }
     
-    public (double lat, double lon, double points) GetMaxPos(int numLeft)
+    public (double lat, double lon, double points) GetMaxPos(List<StoreLocation> stores, double willingnessToTravelInMeters)
     {
-        ConcurrentQueue<(int lat, int lon, double points, int numPoints)> maxPerRowQueue = new();
-        double threshold = 0.1;
-        
-        Parallel.For(0, _size,
-            x =>
-            {
-                int maxLatIx = -1;
-                int maxLongIx = -1;
-                double maxPoints = double.MinValue;
-                int maxNumHotSpots = -1;
-                for (int y = 0; y < _size; y++)
+        while (true)
+        {
+            ConcurrentQueue<(int lat, int lon, double points, int numPoints)> maxPerRowQueue = new();
+            Parallel.For(0, _size,
+                x =>
                 {
-                    var points = _map[x, y];
-                    if (points > maxPoints)
+                    int maxLatIx = -1;
+                    int maxLongIx = -1;
+                    double maxPoints = double.MinValue;
+                    int maxNumHotSpots = -1;
+                    for (int y = 0; y < _size; y++)
                     {
-                        maxPoints = points;
-                        maxLatIx = x;
-                        maxLongIx = y;
-                        maxNumHotSpots = _numHotspots[x, y];
+                        var points = _map[x, y];
+                        if (points > maxPoints)
+                        {
+                            maxPoints = points;
+                            maxLatIx = x;
+                            maxLongIx = y;
+                            maxNumHotSpots = _numHotspots[x, y];
+                        }
                     }
+
+                    maxPerRowQueue.Enqueue((maxLatIx, maxLongIx, maxPoints, maxNumHotSpots));
                 }
+            );
 
-                maxPerRowQueue.Enqueue((maxLatIx, maxLongIx, maxPoints, maxNumHotSpots));
+            var result = maxPerRowQueue.ToArray();
+            var maxPoints = result.Select(r => r.points).Max();
+            var best = result.MaxBy(n => n.points);
+
+            if (stores.Any())
+            {
+                var smallestDist = stores.Select(s => Helper.DistanceBetweenPoint(s.Latitude, s.Longitude, _minLat + best.lat * _latPerIx, _minLong + best.lon * _longPerIx)).Min();
+                if (smallestDist < willingnessToTravelInMeters)
+                {
+                    _map[best.lat, best.lon] = -20;
+                    continue;
+                }
             }
-        );
 
-        var result = maxPerRowQueue.ToArray();
-        var maxPoints = result.Select(r => r.points).Max();
-        (int lat, int lon, double points, int numPoints) best;
-        // if(numLeft > 30)
-        //     best = result.Where(r => r.points >= (maxPoints - threshold)).MinBy(n => n.numPoints);
-        // else
-             best = result.MaxBy(n => n.points);
-
-        // var topList = result.Where(r => r.points >= (maxPoints - threshold)).ToArray();
-        // var ix = new Random(numLeft).Next(0, topList.Length);
-        // var best = topList[ix];
-        return (_minLat + best.lat * _latPerIx, _minLong + best.lon * _longPerIx, maxPoints);
-
-        // int maxLatIx = -1;
-        // int maxLongIx = -1;
-        // double maxPoints = double.MinValue;
-        // foreach (var row in maxPerRowQueue.ToArray())
-        // {
-        //     if (row.points > maxPoints)
-        //     {
-        //         maxPoints = row.points;
-        //         maxLatIx = row.lat;
-        //         maxLongIx = row.lon;
-        //     }
-        // }
-
-        // return (_minLat + maxLatIx * _latPerIx, _minLong + maxLongIx * _longPerIx, maxPoints);
+            return (_minLat + best.lat * _latPerIx, _minLong + best.lon * _longPerIx, maxPoints);
+        }
     }
     
     private static double GetFootFall(Hotspot hs, int distanceInMeters)

@@ -29,7 +29,7 @@ public class SandboxEngine
         var sandboxClusterHotspotsToLocations = new SandboxPaintToLocations6ValueLessHotspots(_generalData);
         ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, _generalData, mapData);
 
-        Parallel.For(1, 20, DoWorkInOneThread);
+        Parallel.For(1, 2, DoWorkInOneThread);
 
         sw.Stop();
 
