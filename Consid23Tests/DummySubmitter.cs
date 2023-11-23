@@ -6,7 +6,7 @@ namespace Consid23Tests;
 
 public class DummySubmitter : ISolutionSubmitter
 {
-    public void AddSolutionToSubmit(SubmitSolution sol)
+    public void AddSolutionToSubmit(SubmitSolution sol, double score)
     {
         JsonConvert.SerializeObject(sol);   // To measure the cost
     }

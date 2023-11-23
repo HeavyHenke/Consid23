@@ -5,7 +5,6 @@ namespace Consid23;
 
 public class ConsoleOnlySubmitter : ISolutionSubmitter
 {
-    private readonly IScoring _scorer;
     private readonly GeneralData _generalData;
     private readonly MapData _mapData;
 
@@ -15,23 +14,18 @@ public class ConsoleOnlySubmitter : ISolutionSubmitter
     {
         _mapData = mapData;
         _generalData = generalData;
-        _scorer = new ScoringHenrik(generalData, mapData);
     }
 
-    public void AddSolutionToSubmit(SubmitSolution sol)
+    public void AddSolutionToSubmit(SubmitSolution sol, double score)
     {
-        var score = _scorer.CalculateScore(sol);
-        if (score?.GameScore == null)
-            return;
-
         lock(this)
-        if (score.GameScore!.Total > _maxSubmitted)
+        if (score > _maxSubmitted)
         {
             //Console.WriteLine($"Not submitting (ConsoleOnlySubmitter) GameScore: {score.GameScore.Total} co2 {score.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {score.GameScore.Earnings} footfall {score.GameScore.TotalFootfall}");
 
-            _maxSubmitted = score.GameScore.Total;
+            _maxSubmitted = score;
             var time = DateTime.Now.ToString("dd_hh_mm_ss");
-            var filename = $"{_mapData.MapName}_{score.GameScore.Total}_{time}.json";
+            var filename = $"{_mapData.MapName}_{score}_{time}.json";
             if(File.Exists(filename) == false)
                 File.WriteAllText(filename, JsonConvert.SerializeObject(sol));
         }

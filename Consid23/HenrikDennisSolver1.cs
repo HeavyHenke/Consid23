@@ -76,10 +76,11 @@ public class HenrikDennisSolver1
     public SubmitSolution OptimizeSolution(SubmitSolution submitSolution)
     {
         var sol = _model.ConvertFromSubmitSolution(submitSolution);
-        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
-        
+       
         // Do cheap iterations first
         var currScore = _model.CalculateScore(sol);
+        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol), currScore);
+
         while (true)
         {
             var optimizations = new List<(DennisModel.SolutionLocation[] sol, double score)>
@@ -98,7 +99,7 @@ public class HenrikDennisSolver1
             
             sol = best.sol;
             currScore = best.score;
-            _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
+            _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol), currScore);
         }
         
         // More expensive loop
@@ -125,7 +126,7 @@ public class HenrikDennisSolver1
             
             sol = best.sol;
             currScore = best.score;
-            _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
+            _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol), currScore);
         }
         
         
@@ -175,7 +176,7 @@ public class HenrikDennisSolver1
                     {
                         bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
                         bestScore = score;
-                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution), score);
                     }
                 }
             }
@@ -211,7 +212,7 @@ public class HenrikDennisSolver1
                     {
                         bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
                         bestScore = score;
-                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution), score);
                     }
                 }
             }
@@ -246,7 +247,7 @@ public class HenrikDennisSolver1
                 {
                     bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
                     bestScore = score;
-                    _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                    _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution), score);
                 }
             }
         }
@@ -267,7 +268,7 @@ public class HenrikDennisSolver1
                     {
                         bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
                         bestScore = score;
-                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution), score);
                     }
                 }
             }
@@ -286,7 +287,7 @@ public class HenrikDennisSolver1
                     {
                         bestSolution = (DennisModel.SolutionLocation[])workingCopy.Clone();
                         bestScore = score;
-                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution));
+                        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(bestSolution), score);
                     }
                 }
             }

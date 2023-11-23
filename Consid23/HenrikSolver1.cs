@@ -21,7 +21,7 @@ public class HenrikSolver1
     {
         var sol = CreateStartPointByAddOneAt();
         //_solutionSubmitter.AddSolutionToSubmit(CreateStartPointBySalesVolume());
-        _solutionSubmitter.AddSolutionToSubmit(sol);
+        _solutionSubmitter.AddSolutionToSubmit(sol, _scorer.CalculateScore(sol).GameScore.Total);
         return CalcSolution(sol);
     }
     
@@ -35,9 +35,9 @@ public class HenrikSolver1
         {
             var preScore = _scorer.CalculateScore(sol);
             RemoveOneFromAll(sol);
-            _solutionSubmitter.AddSolutionToSubmit(sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol, _scorer.CalculateScore(sol).GameScore.Total);
             AddOneForAll(sol);
-            _solutionSubmitter.AddSolutionToSubmit(sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol, _scorer.CalculateScore(sol).GameScore.Total);
             var postScore = _scorer.CalculateScore(sol);
 
             if (ScoreDiff(postScore, preScore) <= 0)
@@ -49,9 +49,9 @@ public class HenrikSolver1
         {
             var preScore = _scorer.CalculateScore(sol);
             TryPlusOneAndMinusTwoOnNeighbours(ref sol);
-            _solutionSubmitter.AddSolutionToSubmit(sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol, _scorer.CalculateScore(sol).GameScore.Total);
             TryMinusOneAndPlusTwoOnNeighbours(ref sol);
-            _solutionSubmitter.AddSolutionToSubmit(sol);
+            _solutionSubmitter.AddSolutionToSubmit(sol, _scorer.CalculateScore(sol).GameScore.Total);
             var postScore = _scorer.CalculateScore(sol);
             if (ScoreDiff(postScore, preScore) <= 0)
                 break;

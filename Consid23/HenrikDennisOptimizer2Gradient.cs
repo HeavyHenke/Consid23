@@ -17,9 +17,9 @@ public class HenrikDennisOptimizer2Gradient
     public SubmitSolution OptimizeSolution(SubmitSolution submitSolution)
     {
         var sol = _model.ConvertFromSubmitSolution(submitSolution);
-        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
-
         var currScore = _model.CalculateScore(sol);
+        _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol), currScore);
+        
         while (true)
         {
             // IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> optimizations = new[] { (sol, currScore, "initial") };
@@ -60,7 +60,7 @@ public class HenrikDennisOptimizer2Gradient
                 //     Console.WriteLine($"Optimized using {latestBest.optimizationName}, earned {latestBest.score - currScore}");
                 currScore = latestBest.score;
                 sol = latestBest.sol;
-                _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol));
+                _solutionSubmitter.AddSolutionToSubmit(_model.ConvertToSubmitSolution(sol), currScore);
             }
             else
             {
