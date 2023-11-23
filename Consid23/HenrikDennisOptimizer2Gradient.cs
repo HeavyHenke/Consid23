@@ -33,7 +33,8 @@ public class HenrikDennisOptimizer2Gradient
                 AddOneFromAll,
                 TryPlusOneAndMinusFourOnNeighbours,
                 ExchangeNeighbours,
-                RotateThreeNeighbours
+                RotateThreeNeighbours,
+                RotateFourNeighbours
             };
 
             var solForParallelLoop = sol;
@@ -375,7 +376,49 @@ public class HenrikDennisOptimizer2Gradient
             }
         }
     }
+    
+    private IEnumerable<(DennisModel.SolutionLocation[] sol, double score, string optimizationName)> RotateFourNeighbours(DennisModel.SolutionLocation[] original, double minScore)
+    {
+        var sol = (DennisModel.SolutionLocation[])original.Clone();
+        var salesVolume = new double[_model.Locations.Length];
 
+        for (var i = 0; i < sol.Length - 1; i++)
+        {
+            var modelNeighbours = _model.Neighbours[i];
+            if(modelNeighbours.Count < 3)
+                continue;
+
+            for (int j = 0; j < modelNeighbours.Count - 1; j++)
+            for (int k = j + 1; k < modelNeighbours.Count; k++)
+            for (int l = k + 1; l < modelNeighbours.Count; l++)
+            {
+                var a = sol[i];
+                var b = sol[modelNeighbours[j].index];
+                var c = sol[modelNeighbours[k].index];
+                var d = sol[modelNeighbours[l].index];
+
+                sol[i] = d;
+                sol[modelNeighbours[j].index] = a;
+                sol[modelNeighbours[k].index] = b;
+                sol[modelNeighbours[l].index] = c;
+
+                var postScore = _model.CalculateScore(sol, salesVolume);
+
+                if (postScore > minScore)
+                {
+                    minScore = postScore;
+                    yield return ((DennisModel.SolutionLocation[])sol.Clone(), minScore, $"RotateFourNeighbours({i})");
+                }
+
+                sol[i] = a;
+                sol[modelNeighbours[j].index] = b;
+                sol[modelNeighbours[k].index] = c;
+                sol[modelNeighbours[l].index] = d;
+            }
+        }
+    }
+
+    
     private static bool RemoveOne(DennisModel.SolutionLocation[] sol, int index)
     {
         if (sol[index].Freestyle3100Count > 0)
