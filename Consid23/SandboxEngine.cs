@@ -19,28 +19,28 @@ public class SandboxEngine
         object lck = new object();
         double best = -100000;
         SubmitSolution? bestSol = null;
+        MapData? bestMap = null;
 
 
         var sw = Stopwatch.StartNew();
 
 
         // var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(_generalData);
-        var sandboxClusterHotspotsToLocations = new SandboxPaintToLocations2(_generalData);
-        var clustered = sandboxClusterHotspotsToLocations.ClusterHotspots(mapData);
-        ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, _generalData, clustered);
+        var sandboxClusterHotspotsToLocations = new SandboxPaintToLocations6ValueLessHotspots(_generalData);
+        ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, _generalData, mapData);
 
-        Parallel.For(1, 2, DoWorkInOneThread);
+        Parallel.For(1, 20, DoWorkInOneThread);
 
         sw.Stop();
 
         submitter.Dispose();
         Console.WriteLine($"Done, it took {sw.Elapsed}, best found was {best}");
 
-        var localScore = new Scoring(_generalData, clustered).CalculateScore(bestSol);
+        var localScore = new Scoring(_generalData, bestMap).CalculateScore(bestSol);
 
         Console.WriteLine($"Score local {localScore.GameScore.Total} {localScore.GameScore.TotalFootfall} {localScore.GameScore.KgCo2Savings} {localScore.GameScore.Earnings} {localScore.Locations.Sum(l => l.Value.SalesVolume)}");
 
-        var dm = new DennisModel(_generalData, clustered);
+        var dm = new DennisModel(_generalData, bestMap);
         dm.InitiateSandboxLocations(bestSol);
         Console.WriteLine($"DennisModel: {dm.CalculateScore(dm.ConvertFromSubmitSolution(bestSol))}");
         
@@ -52,26 +52,39 @@ public class SandboxEngine
 
         void DoWorkInOneThread(int ix)
         {
-            var localMapData = clustered.Clone();
+            var localMapData = mapData.Clone();
             localMapData.RandomizeLocationOrder(ix);
 
-            // var model = new DennisModel(_generalData, localMapData);
-            // var initial = new HenrikDennisStaticInitialStateCreator(model, _generalData).CreateInitialSolution();
-            // model.InitiateSandboxLocations(initial);
-            // var lastSol = new HenrikDennisSolver1(model, submitter).OptimizeSolution(initial);
-
-            // EmptyAndMoveKiosks(lastSol, localMapData.Border);
-            // foreach (var loc in lastSol.Locations)
-            // {
-            //     localMapData.locations[loc.Key].Latitude = loc.Value.Latitude;
-            //     localMapData.locations[loc.Key].Longitude = loc.Value.Longitude;
-            // }
-
-            var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();  
-            // EmptyAndMoveKiosks(lastSol, localMapData.Border);
-
-            //Console.WriteLine("Optimizing gravity");
-            //lastSol = new HenrikOptimizeByGravity(_generalData, localMapData).Optimize(lastSol);
+            localMapData = sandboxClusterHotspotsToLocations.ClusterHotspots(localMapData);
+            
+            var typeToSmall = new Dictionary<string, int>
+            {
+                { "Convenience", 1 },
+                { "Gas-station", 1 },
+                { "Grocery-store", 2 },
+                { "Kiosk", 0 },
+                { "Grocery-store-large", 0 }
+            };
+            
+            Console.WriteLine("Starting solver!");
+            var lastSol = new SubmitSolution
+            {
+                Locations = new()
+            };
+            foreach (var loc in localMapData.locations)
+            {
+                lastSol.Locations.Add(loc.Key, new PlacedLocations
+                {
+                    Latitude = loc.Value.Latitude,
+                    Longitude = loc.Value.Longitude,
+                    LocationType = loc.Value.LocationType,
+                    Freestyle3100Count = typeToSmall[loc.Value.LocationType],
+                    Freestyle9100Count = loc.Value.LocationType == "Grocery-store-large" ? 1 : 0
+                });
+            }
+            
+            var numWithNeighbours = new DennisModel(_generalData, localMapData).Neighbours.Count(n => n.Count != 0);
+            Console.WriteLine($"Num negihbours; {numWithNeighbours}");
             
 
             var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
@@ -86,6 +99,7 @@ public class SandboxEngine
                 {
                     best = score2;
                     bestSol = lastSol;
+                    bestMap = localMapData;
                 }
             }
 
