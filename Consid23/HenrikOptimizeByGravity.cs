@@ -2,11 +2,7 @@
 
 namespace Consid23;
 
-// [0]: {(Convenience, 1, 0)}
-// [1]: {(Gas-station, 1, 0)}
-// [2]: {(Grocery-store, 2, 0)}
-// [3]: {(Kiosk, 0, 0)}
-// [4]: {(Grocery-store-large, 0, 1)}
+
 
 public class HenrikOptimizeByGravity
 {
