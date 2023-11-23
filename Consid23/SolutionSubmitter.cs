@@ -62,19 +62,23 @@ public class SolutionSubmitter : ISolutionSubmitter
                 {
                     if (bestScoreItem.score > _maxSubmitted)
                     {
-                        var serverScore = _api.Sumbit(_mapData.MapName, JsonConvert.DeserializeObject<SubmitSolution>(bestScoreItem.json)!, _apiKey);
-
-                        _maxSubmitted = bestScoreItem.score;
+                        var data = JsonConvert.DeserializeObject<SubmitSolution>(bestScoreItem.json);
+                        data!.Locations = data.Locations.OrderBy(kvp => kvp.Key).ToDictionary(key => key.Key, val => val.Value);
+                        
                         var time = DateTime.Now.ToString("dd_hh_mm_ss");
                         var filename = $"{_mapData.MapName}_{bestScoreItem.score}_{time}.json";
-                        File.WriteAllText(filename, bestScoreItem.json);
+                        File.WriteAllText(filename, JsonConvert.SerializeObject(data));
 
+                        var serverScore = _api.Sumbit(_mapData.MapName, JsonConvert.DeserializeObject<SubmitSolution>(bestScoreItem.json)!, _apiKey);
                         Console.WriteLine($"GameScore: {serverScore.GameScore!.Total} co2 {serverScore.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {serverScore.GameScore.Earnings} footfall {serverScore.GameScore.TotalFootfall}. Skipped {submitList.Count - 1} items int submit list.");
 
                         if (serverScore.GameScore.Total != bestScoreItem.score)
                         {
                             Console.WriteLine($"SCORE NOT EQUAL!! see file {filename}");
                         }
+                        
+                        _maxSubmitted = bestScoreItem.score;
+                        
                         // Console.WriteLine($"ServerScore: {serverScore.GameScore!.Total} co2 {serverScore.GameScore.KgCo2Savings * _generalData.Co2PricePerKiloInSek} earnings {serverScore.GameScore.Earnings} footfall {serverScore.GameScore.TotalFootfall}");
                     }
                     
