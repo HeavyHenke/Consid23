@@ -108,7 +108,7 @@ public class SandboxPaintToLocations6ValueLessHotspots
             foreach (var hs in usedHotspots)
                 heatMap.RemoveHotspotWithNeg(hs, optimized.lat, optimized.lon);
 
-            heatMap.RemoveDist(optimized.lat, optimized.lon, _generalData.WillingnessToTravelInMeters*1.2);
+            heatMap.RemoveDist(optimized.lat, optimized.lon, _generalData.WillingnessToTravelInMeters*1.1);
             heatMap.SaveAsBitmap($@"c:\temp\2 delete\newImage_{locationName}.bmp");
         }
 
