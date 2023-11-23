@@ -22,6 +22,8 @@ public class HenrikOptimizeByGravity
     public SubmitSolution Optimize(SubmitSolution sol)
     {
         var scorer = new ScoringNoRoundNoNeighbours(_generalData, _mapData);
+
+        var gravityDist = _mapData.Hotspots.Select(h => h.Spread).Max() * 2;
         
         var best = sol;
         var bestScore = scorer.CalculateScore(best);
@@ -42,11 +44,11 @@ public class HenrikOptimizeByGravity
                 var loca = locationList[a];
                 var locb = locationList[b];
                 var dist = Helper.DistanceBetweenPointDouble(loca.Latitude, loca.Longitude, locb.Latitude, locb.Longitude);
-                if (dist > _generalData.WillingnessToTravelInMeters * 2)
+                if (dist > gravityDist)
                     continue;
 
-                var gravity = bestScore.Locations[loca.Key].Footfall * bestScore.Locations[locb.Key].Footfall / (dist * dist);
-                gravity = gravity * 0.1;
+                var gravity = bestScore.Locations[loca.Key].Footfall * bestScore.Locations[locb.Key].Footfall / (dist * dist * dist);
+                gravity = gravity * 2000;
 
                 var v = Math.Atan2(locationList[a].Latitude - locationList[b].Latitude, locationList[a].Longitude - locationList[b].Longitude);
 
@@ -69,7 +71,7 @@ public class HenrikOptimizeByGravity
             var scoreAfterOpt = scorer.CalculateScore(optimized);
 
             //var score = scorer.CalculateScore(work);
-            if (scoreAfterOpt.GameScore.Total >= bestScore.GameScore.Total)
+            if (scoreAfterOpt.GameScore.Total > bestScore.GameScore.Total)
             {
                 best = work;
                 bestScore = scoreAfterOpt;
@@ -94,7 +96,10 @@ public class HenrikOptimizeByGravity
         {
             while (true)
             {
-                var bestMove = deltas.Select(d => MoveAndScore(work, d, 0.0001, loc, scoring)).MaxBy(m => m.score);
+                var bestMove = deltas
+                    //.AsParallel()
+                    .Select(d => MoveAndScore(work, d, 0.00001, loc, scoring))
+                    .MaxBy(m => m.score);
                 if (bestMove.score > bestScore)
                 {
                     bestMove.doIt();

@@ -70,6 +70,10 @@ public class SandboxEngine
             var lastSol = new HenrikSolver1(_generalData, localMapData, submitter).CalcSolution();  
             // EmptyAndMoveKiosks(lastSol, localMapData.Border);
 
+            //Console.WriteLine("Optimizing gravity");
+            //lastSol = new HenrikOptimizeByGravity(_generalData, localMapData).Optimize(lastSol);
+            
+
             var validation = Scoring.SandboxValidation(mapName, lastSol, localMapData);
             if (validation != null) Console.WriteLine("Error: " + validation);
 
