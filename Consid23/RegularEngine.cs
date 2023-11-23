@@ -44,22 +44,22 @@ public class RegularEngine
         void DoWorkInOneThread(int ix)
         {
             var localMapData = mapData.Clone();
-            localMapData.RandomizeLocationOrder(ix+2100);
+            localMapData.RandomizeLocationOrder(ix);
 
             var model = new DennisModel(generalData, localMapData);
             var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
 
             SubmitSolution solution;
-            if ((ix & 7) == 0)  // HenrikDennisSolver1 sometimes since it is solver
-            {
-                var solver = new HenrikDennisSolver1(model, submitter);
-                solution = solver.OptimizeSolution(startPoint1);
-            }
-            else
-            {
-                var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
-                solution = solver.OptimizeSolution(startPoint1);
-            }
+            // if ((ix & 7) == 0)  // HenrikDennisSolver1 sometimes since it is solver
+            // {
+            // var solver = new HenrikDennisSolver1(model, submitter);
+            // solution = solver.OptimizeSolution(startPoint1);
+            // }
+            // else
+            // {
+            var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
+            solution = solver.OptimizeSolution(startPoint1);
+            // }
 
             var score = new Scoring(generalData, localMapData).CalculateScore(solution);
             var score2 = score.GameScore!.Total;
@@ -73,7 +73,7 @@ public class RegularEngine
                 }
             }
 
-            Console.WriteLine($"Best score found: {score2}");
+            Console.WriteLine($"Best score found: {score2} for ix {ix}");
         }
     }
 
