@@ -7,8 +7,8 @@ namespace Consid23;
 public class SandboxPaintToLocations6ValueLessHotspots
 {
     private readonly GeneralData _generalData;
-    private const int HeatMapSize = 2048;
-    private const int OptimizationSize = 100;
+    private const int HeatMapSize = 2048*4;
+    private const int OptimizationSize = 256;
 
     public SandboxPaintToLocations6ValueLessHotspots(GeneralData generalData)
     {
@@ -79,7 +79,7 @@ public class SandboxPaintToLocations6ValueLessHotspots
                 }
             }
 
-            // var optimized = OptimizePoint(maxPos.lat, maxPos.lon, usedHotspots, heatMap.LatPerPixel, heatMap.LongPerPixel);
+            //var optimized = OptimizePoint(maxPos.lat, maxPos.lon, usedHotspots, heatMap.LatPerPixel, heatMap.LongPerPixel, storeLocations);
             var optimized = maxPos;
             foreach(var hs in usedHotspots.ToArray())
             {
@@ -108,26 +108,29 @@ public class SandboxPaintToLocations6ValueLessHotspots
             foreach (var hs in usedHotspots)
                 heatMap.RemoveHotspotWithNeg(hs, optimized.lat, optimized.lon);
 
-            heatMap.RemoveDist(optimized.lat, optimized.lon, _generalData.WillingnessToTravelInMeters);
+            heatMap.RemoveDist(optimized.lat, optimized.lon, _generalData.WillingnessToTravelInMeters*.99);
             heatMap.SaveAsBitmap($@"c:\temp\2 delete\newImage_{locationName}.bmp");
         }
 
         mapData.locations = storeLocations.ToDictionary(key => key.LocationName);
     }
     
-    private static (double lat, double lon, double points) OptimizePoint(double lat, double lon, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel)
+    private (double lat, double lon, double points) OptimizePoint(double lat, double lon, List<Hotspot> hotspots, double latSizePerPixel, double longSizePerPixel, List<StoreLocation> storeLocations)
     {
         var minLat = lat - 2 * latSizePerPixel;
         var maxLat = lat + 2 * latSizePerPixel;
         var minLong = lon - 2 * longSizePerPixel;
         var maxLong = lon + 2 * longSizePerPixel;
-
-        var heatMap = new HeatMap(OptimizationSize, minLong, maxLong, minLat, maxLat);
+        
+        var heatMap = new HeatMapWithNumHotspots(OptimizationSize, minLong, maxLong, minLat, maxLat);
         foreach(var hs in hotspots)
             heatMap.AddHotspot(hs);
 
-        var optimizedLocation = heatMap.GetMaxPos();
-        return optimizedLocation;
+        while (true)
+        {
+            var optimizedLocation = heatMap.GetMaxPos(storeLocations, _generalData.WillingnessToTravelInMeters);
+            return optimizedLocation;
+        }
     }
 
     
