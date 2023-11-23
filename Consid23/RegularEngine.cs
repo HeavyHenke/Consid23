@@ -21,7 +21,7 @@ public class RegularEngine
 
         var sw = Stopwatch.StartNew();
 
-        ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, generalData, mapData);
+        ISolutionSubmitter submitter = new SolutionSubmitter(api, apikey, generalData, mapData);
 
         Parallel.For(1, 100, DoWorkInOneThread);
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Considition2023_Cs;
 using Newtonsoft.Json;
 
@@ -42,8 +43,11 @@ public class SolutionSubmitter : ISolutionSubmitter
 
     private void Worker()
     {
+        var stopWatch = new Stopwatch();
         while (true)
         {
+            stopWatch.Restart();
+            
             var submitList = new List<(string json, double score)>();
             while (_submitQueue.IsEmpty == false)
             {
@@ -85,8 +89,11 @@ public class SolutionSubmitter : ISolutionSubmitter
 
             if (_exit && _submitQueue.IsEmpty)
                 return;
-            
-            Thread.Sleep(10_000);
+
+            var sleepTime = 10_000 - (int)stopWatch.ElapsedMilliseconds;
+            if (sleepTime < 10)
+                sleepTime = 10;
+            Thread.Sleep(sleepTime);
         }
     }
 }
