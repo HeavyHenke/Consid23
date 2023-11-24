@@ -9,7 +9,7 @@ public class SandboxEngine
 
     public async Task Run(string apikey)
     {
-        var mapName = MapNames.GSandbox;
+        var mapName = MapNames.SSandbox;
 
         HttpClient client = new();
         Api api = new(client);
@@ -27,7 +27,7 @@ public class SandboxEngine
 
         // var sandboxClusterHotspotsToLocations = new SandboxClusterHotspotsToLocations(_generalData);
         var sandboxClusterHotspotsToLocations = new SandboxPaintToLocations6ValueLessHotspots(_generalData);
-        ISolutionSubmitter submitter = new ConsoleOnlySubmitter(api, apikey, _generalData, mapData);
+        ISolutionSubmitter submitter = new SolutionSubmitter(api, apikey, _generalData, mapData);
 
         Parallel.For(1, 2, DoWorkInOneThread);
 
@@ -44,8 +44,8 @@ public class SandboxEngine
         dm.InitiateSandboxLocations(bestSol);
         Console.WriteLine($"DennisModel: {dm.CalculateScore(dm.ConvertFromSubmitSolution(bestSol))}");
         
-  // var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
-  // Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings} gameid: {submittedScore.Id}");
+  var submittedScore = api.Sumbit(mapData.MapName, bestSol!, apikey);
+  Console.WriteLine($"Score from server {submittedScore.GameScore.Total} {submittedScore.GameScore.TotalFootfall} {submittedScore.GameScore.KgCo2Savings} {submittedScore.GameScore.Earnings} gameid: {submittedScore.Id}");
 
         return;
 

@@ -26,15 +26,14 @@ public class HenrikDennisOptimizer2Gradient
 
             var strategies = new[]
             {
-                TryPlusOneAndMinusThreeOnNeighbours,
+                // TryPlusOneAndMinusThreeOnNeighbours,
                 RemoveOneFromAll,
-                TryPlusOneAndMinusOneOnNeighbour,
-                TryPlusOneAndMinusTwoOnNeighbours,
+                //TryPlusOneAndMinusTwoOnNeighbours,
                 AddOneFromAll,
-                TryPlusOneAndMinusFourOnNeighbours,
-                ExchangeNeighbours,
-                RotateThreeNeighbours,
-                RotateFourNeighbours
+                // TryPlusOneAndMinusFourOnNeighbours,
+                // ExchangeNeighbours,
+                // RotateThreeNeighbours,
+                // RotateFourNeighbours
             };
 
             var solForParallelLoop = sol;

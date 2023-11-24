@@ -7,7 +7,7 @@ public class RegularEngine
 {
     public async Task Run(string apikey)
     {
-        var mapName = MapNames.Goteborg;
+        var mapName = MapNames.Berlin;
 
         HttpClient client = new();
         Api api = new(client);
@@ -23,7 +23,7 @@ public class RegularEngine
 
         ISolutionSubmitter submitter = new SolutionSubmitter(api, apikey, generalData, mapData);
 
-        Parallel.For(1, 100, DoWorkInOneThread);
+        Parallel.For(1, 1000, DoWorkInOneThread);
 
         sw.Stop();
 
@@ -44,7 +44,7 @@ public class RegularEngine
         void DoWorkInOneThread(int ix)
         {
             var localMapData = mapData.Clone();
-            localMapData.RandomizeLocationOrder(ix);
+            localMapData.RandomizeLocationOrder(ix+1000);
 
             var model = new DennisModel(generalData, localMapData);
             var startPoint1 = new HenrikDennisStaticInitialStateCreator(model, generalData).CreateInitialSolution();
@@ -52,14 +52,14 @@ public class RegularEngine
             SubmitSolution solution;
             // if ((ix & 7) == 0)  // HenrikDennisSolver1 sometimes since it is solver
             // {
-            // var solver = new HenrikDennisSolver1(model, submitter);
-            // solution = solver.OptimizeSolution(startPoint1);
-            // }
-            // else
-            // {
-            var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
+            var solver = new HenrikDennisSolver1(model, submitter);
             solution = solver.OptimizeSolution(startPoint1);
             // }
+            // else
+            {
+            // var solver = new HenrikDennisOptimizer2Gradient(model, submitter);
+            // solution = solver.OptimizeSolution(startPoint1);
+            }
 
             var score = new Scoring(generalData, localMapData).CalculateScore(solution);
             var score2 = score.GameScore!.Total;

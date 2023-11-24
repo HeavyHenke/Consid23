@@ -95,7 +95,7 @@ public class HenrikDennisSolver1
                 break;
 
             var ix = optimizations.IndexOf(best);
-            Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore} total score {best.score}");
+            // Console.WriteLine($"Best ix: {ix} with added score {best.score - currScore} total score {best.score}");
             
             sol = best.sol;
             currScore = best.score;
@@ -103,7 +103,7 @@ public class HenrikDennisSolver1
         }
         
         // More expensive loop
-        Console.WriteLine("Starting expensive loop");
+        Console.WriteLine($"Starting expensive loop with score {currScore}");
         while (true)
         {
             var optimizations = new List<(DennisModel.SolutionLocation[] sol, double score)>
@@ -113,7 +113,7 @@ public class HenrikDennisSolver1
                 TryPlusOneAndMinusOneOnNeighbour(sol),
                 TryPlusOneAndMinusTwoOnNeighbours(sol),
                 TryPlusOneAndMinusThreeOnNeighbours(sol),
-                TryOptimizeNeighbourhoods(sol, 6),
+                TryOptimizeNeighbourhoods(sol, 2),
             };
 
             var best = optimizations.MaxBy(o => o.score);
